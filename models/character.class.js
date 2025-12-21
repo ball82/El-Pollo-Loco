@@ -10,6 +10,7 @@ class Character extends MovableObject{
         'img_pollo_locco/img/2_character_pepe/2_walk/W-25.png',
         'img_pollo_locco/img/2_character_pepe/2_walk/W-26.png', 
     ];
+    world;
 
     constructor(){
 
@@ -21,11 +22,14 @@ class Character extends MovableObject{
 
         animate(){
         setInterval(() => {
-            let img = this.images_walking[this.CurrentImage];
-            this.img = this.imageCache[img];
-            this.CurrentImage++;
-            if(this.CurrentImage >= this.images_walking.length){
-                this.CurrentImage = 0;
+
+            if(this.world.keyboard.right){
+                let img = this.images_walking[this.CurrentImage];
+                this.img = this.imageCache[img];
+                this.CurrentImage++;
+                if(this.CurrentImage >= this.images_walking.length){
+                    this.CurrentImage = 0;
+                }
             }
         }, 180);
     }
