@@ -10,11 +10,6 @@ class Character extends MovableObject{
         'img_pollo_locco/img/2_character_pepe/2_walk/W-25.png',
         'img_pollo_locco/img/2_character_pepe/2_walk/W-26.png', 
     ];
-    CurrentImage = 0;
-
-
-
-
 
     constructor(){
 
@@ -32,7 +27,7 @@ class Character extends MovableObject{
             if(this.CurrentImage >= this.images_walking.length){
                 this.CurrentImage = 0;
             }
-        }, 200);
+        }, 180);
     }
 
     jump() {
