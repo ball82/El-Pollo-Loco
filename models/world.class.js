@@ -1,12 +1,59 @@
 class World {   
     character = new Character();
-    enemies = [new Chicken(), new Chicken(), new Chicken()];
+    enemies = [
+        new Chicken(), 
+        new Chicken(), 
+        new Chicken()
+    ];
+    canves;
+    clouds = [
+        new Cloud()
+    ];
+    backgroundObjects = [
+        new BackgroundObject('img_pollo_locco/img/5_background/layers/air.png', 0, 0),
+        new BackgroundObject('img_pollo_locco/img/5_background/layers/3_third_layer/full.png', 0, 0),
+        new BackgroundObject('img_pollo_locco/img/5_background/layers/2_second_layer/full.png', 0, 0),
+        new BackgroundObject('img_pollo_locco/img/5_background/layers/1_first_layer/full.png', 0, 0),
+    ];
+    ctx;    
 
+    constructor(canvas) {
+        this.ctx = canvas.getContext("2d");
+        this.canves = canvas;
+        this.draw();
 
-
-    
-    drow() {
     }
+    
+    draw() {
+
+        this.ctx.clearRect(0, 0, this.canves.width, this.canves.height); // clear canvas
+
+        this.ctx.drawImage(this.character.img, this.character.x, this.character.y, this.character.width, this.character.height);
+        this.addObject(this.backgroundObjects); 
+        this.addToMap(this.character);
+        this.addObject(this.enemies);
+        this.addObject(this.clouds);
+
+        
+       
+
+
+        //requestAnimationFrame(() => this.draw()); // Modernere
+        let self = this;
+        requestAnimationFrame(function() {
+            self.draw();
+        });
+    }
+
+    addObject = function(objects){
+        objects.forEach(o => {
+            this.addToMap(o);
+        });
+    }
+
+    addToMap = function(mo){
+        this.ctx.drawImage(mo.img, mo.x, mo.y, mo.width, mo.height);
+    };
 
 
 }
