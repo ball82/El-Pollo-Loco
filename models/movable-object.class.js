@@ -7,6 +7,7 @@ class MovableObject {
     imageCache = {};
     CurrentImage = 0;
     speed = 0.25;
+    otherDirection  = false;
     
     
     loadImage(path) {
@@ -18,6 +19,7 @@ class MovableObject {
         arr.forEach((path) => {
             let img = new Image();
             img.src = path;
+            img.style = "transition: scaleX(-1)";
             this.imageCache[path] = img;
         });
     }
