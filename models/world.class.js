@@ -1,23 +1,12 @@
 class World {   
     character = new Character();
-    enemies = [
-        new Chicken(), 
-        new Chicken(), 
-        new Chicken()
-    ];
+    enemies = level1.enemies;
+    clouds = level1.clouds;
+    backgroundObjects = level1.backgroundObjects;
     canves;
-
-    clouds = [
-        new Cloud()
-    ];
-    backgroundObjects = [
-        new BackgroundObject('img_pollo_locco/img/5_background/layers/air.png', 0, 0),
-        new BackgroundObject('img_pollo_locco/img/5_background/layers/3_third_layer/full.png', 0, 0),
-        new BackgroundObject('img_pollo_locco/img/5_background/layers/2_second_layer/full.png', 0, 0),
-        new BackgroundObject('img_pollo_locco/img/5_background/layers/1_first_layer/full.png', 0, 0),
-    ];
     ctx;    
     keyboard;
+    camera_x = 0;
 
 
 
@@ -35,11 +24,15 @@ class World {
 
         this.ctx.clearRect(0, 0, this.canves.width, this.canves.height); // clear canvas
 
+        this.ctx.translate(this.camera_x, 0) ;
+
         this.ctx.drawImage(this.character.img, this.character.x, this.character.y, this.character.width, this.character.height);
         this.addObject(this.backgroundObjects); 
         this.addToMap(this.character);
         this.addObject(this.enemies);
         this.addObject(this.clouds);
+
+        this.ctx.translate(-this.camera_x, 0);  
 
         //requestAnimationFrame(() => this.draw()); // Modernere
         let self = this;
