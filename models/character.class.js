@@ -7,7 +7,7 @@ class Character extends MovableObject{
 
 
 
-    images_walking   = [
+    images_Walking   = [
         'img_pollo_locco/img/2_character_pepe/2_walk/W-21.png',
         'img_pollo_locco/img/2_character_pepe/2_walk/W-22.png',
         'img_pollo_locco/img/2_character_pepe/2_walk/W-23.png',
@@ -20,7 +20,7 @@ class Character extends MovableObject{
     constructor(){
 
         super().loadImage('img_pollo_locco/img/2_character_pepe/1_idle/idle/I-1.png');
-        this.loadImages(this.images_walking);
+        this.loadImages(this.images_Walking);
 
         this.animate();
     }
@@ -36,23 +36,24 @@ class Character extends MovableObject{
                     this.x -= this.speed;
                     this.otherDirection = true;
                 }
-                this.world.camera_x = -this.x + 100;
+                if (this.x < 0) {
+                    this.x = 0;
+                }
+                if (this.x > this.world.level.level_end_x) {
+                    this.x = this.world.level.level_end_x;
+                }
+                this.world.camera_x = -this.x + 80;
             }, 1000/60);
 
             setInterval(() => {
 
                 if(this.world.keyboard.right || this.world.keyboard.left){
-                    let i = this.CurrentImage % this.images_walking.length;
-                    this.path = this.images_walking[i];
-                    this.img = this.imageCache[this.path];
-                    this.CurrentImage++;
+                    this.playAnimation(this.images_Walking);
                 }
             }, 50);
     }
 
     jump() {
-        //Character jump logic
-        console.log("Jumping");
     }
 
 
