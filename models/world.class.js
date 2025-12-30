@@ -52,13 +52,16 @@ class World {
         
         if(mo.otherDirection){
             this.ctx.save();
-            this.ctx.translate(mo.x + mo.width, 0);
+            this.ctx.translate(mo.width, 0);
             this.ctx.scale(-1, 1);
-            this.ctx.drawImage(mo.img, 0, mo.y, mo.width, mo.height);
-            this.ctx.restore();
-            return;
+            mo.x = mo.x * -1;
         }
         this.ctx.drawImage(mo.img, mo.x, mo.y, mo.width, mo.height);
-        }
+        if(mo.otherDirection){
+            mo.x = mo.x * -1;
+            this.ctx.restore(); 
+
+        }   
+    }
 
 }

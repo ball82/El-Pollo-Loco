@@ -5,9 +5,6 @@ class Character extends MovableObject{
     speed = 17;
     width = 150;
 
-
-
-
     images_Walking   = [
         'img_pollo_locco/img/2_character_pepe/2_walk/W-21.png',
         'img_pollo_locco/img/2_character_pepe/2_walk/W-22.png',
@@ -29,11 +26,9 @@ class Character extends MovableObject{
         'img_pollo_locco/img/2_character_pepe/3_jump/J-39.png',      
     ];
 
-
     world;
 
     constructor(){
-
         super().loadImage('img_pollo_locco/img/2_character_pepe/1_idle/idle/I-1.png');
         this.loadImages(this.images_Walking);
         this.loadImages(this.images_Jupping);
@@ -44,25 +39,17 @@ class Character extends MovableObject{
     animate(){
 
         setInterval(() => {
-            if(this.world.keyboard.right){
-                this.x += this.speed;
+            if(this.world.keyboard.right && this.x < this.world.level.level_end_x ){
+                this.moveRight();
                 this.otherDirection = false;
             }
-            if(this.world.keyboard.left){
-                this.x -= this.speed;
+            if(this.world.keyboard.left && this.x > 0 ){
+                this.moveLeft();
                 this.otherDirection = true;
+             }
+            if(this.world.keyboard.space){
+                this.jump(); 
             }
-            if(this.world.keyboard.up){
-                if(!this.isAboveGround())   
-                this.speedY = 15;
-            }
-            if (this.x < 0) {
-                this.x = 0;
-            }
-            if (this.x > this.world.level.level_end_x) {
-                this.x = this.world.level.level_end_x;
-            } 
-
 
             this.world.camera_x = -this.x + 80;
         }, 1000/60);
@@ -80,8 +67,8 @@ class Character extends MovableObject{
     }
 
     jump() {
-    }
-
-
+        if(!this.isAboveGround())
+        this.speedY = 15;
+        } 
 
 }
