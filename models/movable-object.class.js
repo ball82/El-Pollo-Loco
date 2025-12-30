@@ -1,15 +1,10 @@
-class MovableObject {
-  x = 120;
-  y = 280;
-  img;
-  height = 150;
-  width = 100;
-  imageCache = {};
-  CurrentImage = 0;
+class MovableObject extends DrawableObject {
   speed = 0.25;
   otherDirection  = false;
   speedY = 0;
   acceleration = 1;
+  energy = 100;
+  lastHit = 0;
   
 
   applyGravity() {
@@ -24,35 +19,34 @@ class MovableObject {
   isAboveGround() {
     return this.y < 150;
   }
-   
-  loadImage(path) {
-      this.img = new Image();
-      this.img.src = path;
+
+
+
+  isColliding(mo){
+    return this.x + this.width > mo.x &&
+            this.y + this.height > mo.y &&
+            this.x < mo.x + mo.width &&
+            this.y < mo.y + mo.height;
   }
+  hit() {
+    this.energy -= 5;
+    if (this.energy < 0) {
+      this.energy = 0;
+    } else {
+      this.lastHit = new Date().getTime();
+    } 
+  }  
 
-  draw(ctx) {
-      ctx.drawImage(this.img, this.x, this.y, this.width, this.height);
-  }
-
-  drawFrame(ctx) {
-    ctx.beginPath();
-    ctx.lineWidth = "1";
-        ctx.strokeStyle = "red";
-        ctx.rect(this.x, this.y, this.width, this.height);
-        ctx.stroke();
-  }
+  isHurt() {
+    let timepassed = new Date().getTime() - this.lastHit; 
+    timepassed = timepassed / 1000; 
+    return timepassed < 1.2; 
+   }
 
 
-
-  loadImages(arr) {
-      arr.forEach((path) => {
-          let img = new Image();
-          img.src = path;
-          img.style = "transition: scaleX(-1)";
-          this.imageCache[path] = img;
-      });
-  }
-
+  isDead() {
+    return this.energy == 0;
+  } 
 
   playAnimation(images) {
     let i = this.CurrentImage % images.length;

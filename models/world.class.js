@@ -8,8 +8,7 @@ class World {
     ctx;    
     keyboard;
     camera_x = 0;
-
-
+    statusBar = new StatusBar();
 
     constructor(canvas, keyboard){
         this.ctx = canvas.getContext("2d");
@@ -17,11 +16,22 @@ class World {
         this.keyboard = keyboard;
         this.draw();
         this.setWorld();
+        this.checkCollisions();
     }
 
     setWorld(){
         this.character.world = this;
     } 
+
+    checkCollisions(){
+        setInterval(() => {
+            this.enemies.forEach((enemy) => {
+                if(this.character.isColliding(enemy)){
+                    this.character.hit();
+                }
+            });
+        }, 1000);
+    }
 
     draw() {
 
@@ -31,10 +41,10 @@ class World {
 
         this.ctx.drawImage(this.character.img, this.character.x, this.character.y, this.character.width, this.character.height);
         this.addObject(this.backgroundObjects); 
+        this.addToMap(this.statusBar);
         this.addToMap(this.character);
         this.addObject(this.enemies);
         this.addObject(this.clouds);
-
         this.ctx.translate(-this.camera_x, 0);  
 
         //requestAnimationFrame(() => this.draw()); // Modernere
@@ -64,6 +74,7 @@ class World {
 
         }   
     }
+
     flipImage(mo) {
         this.ctx.save();
         this.ctx.translate(mo.width, 0);
