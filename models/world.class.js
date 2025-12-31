@@ -28,6 +28,7 @@ class World {
             this.enemies.forEach((enemy) => {
                 if(this.character.isColliding(enemy)){
                     this.character.hit();
+                    this.statusBar.setPercentage(this.character.energy);
                 }
             });
         }, 1000);
@@ -41,13 +42,17 @@ class World {
 
         this.ctx.drawImage(this.character.img, this.character.x, this.character.y, this.character.width, this.character.height);
         this.addObject(this.backgroundObjects); 
+
+        this.ctx.translate(-this.camera_x, 0);  
         this.addToMap(this.statusBar);
+        this.ctx.translate(this.camera_x, 0) ;
+
+
         this.addToMap(this.character);
         this.addObject(this.enemies);
         this.addObject(this.clouds);
         this.ctx.translate(-this.camera_x, 0);  
 
-        //requestAnimationFrame(() => this.draw()); // Modernere
         let self = this;
         requestAnimationFrame(function() {
             self.draw();
