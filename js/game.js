@@ -30,7 +30,10 @@ document.addEventListener("keydown", (event) => {
     if (event.key === " ") {
         keyboard.space = true;
         world.character.jump();
-    }       
+    }
+    if (event.key === "d") {
+        keyboard.D = true;   
+    }     
     
 }); 
     
@@ -49,6 +52,9 @@ document.addEventListener("keyup", (event) => {
     }
     if (event.key === " ") {
         keyboard.space = false;
+    }
+    if (event.key === "d") {
+        keyboard.D = false;
     }
 
 });
