@@ -19,24 +19,37 @@
     <script src="./models/throwable-object.class.js"></script>
     <script src="./models/endboss.class.js"></script>
     <script src="./levels/level1.js"></script>
+    <script src="./js/modal-templates.js"></script>
     <script src="./js/game.js"></script>
 
 </head>
-<body>
+<body> 
     <div class="page">
-        <section class="hero landing" id="landing">
-            <h1>El Pollo Loco</h1>
-            <p>Hilf Pepe durch die Wüste, sammle Münzen und meistere den Endboss.</p>
-            <div class="hero-actions">
-                <button class="btn primary" onclick="startGame()">Spiel starten</button>
-                <button class="btn" onclick="openModal('how')">So geht's</button>
-                <button class="btn" onclick="openModal('controls')">Tasten</button>
-                <button class="btn ghost" onclick="openModal('story')">Story</button>
-                <button class="btn ghost" onclick="toggleFullscreen()">Fullscreen</button>
-            </div>
-        </section>
+        <div id="game-area">
+            <canvas id="canvas" width="720" height="480"></canvas>
+            <section class="landing-overlay" id="landing">
+                <div class="landing-card">
+                    <h1>El Pollo Loco</h1>
+                    <p>Hilf Pepe durch die Wüste und besiege den Endboss.</p>
+                    <div class="landing-actions">
+                        <button class="btn primary" onclick="startGame()">Spiel starten</button>
+                        <button class="btn" onclick="openModal('how')">So geht's</button>
+                        <button class="btn" onclick="openModal('controls')">Tasten</button>
+                        <button class="btn ghost" onclick="openModal('story')">Story</button>
+                        <button class="btn ghost" onclick="toggleFullscreen()">Fullscreen</button>
+                    </div>
+                </div>
+            </section>
+        </div>
+    </div>
 
-
+    <div class="modal hidden" id="info-modal" onclick="closeModal()">
+        <div class="modal-card" onclick="event.stopPropagation()">
+            <button class="modal-close" aria-label="Dialog schließen" onclick="closeModal()">×</button>
+            <h2 id="modal-title">Info</h2>
+            <div class="modal-content" id="modal-content"></div>
+        </div>
+    </div>
 </body>
 
 
