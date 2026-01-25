@@ -22,10 +22,21 @@
     <script src="./js/game.js"></script>
 
 </head>
-<body onload="init()">
-    <h1>El pollo loco</h1>
+<body>
+    <div class="page">
+        <section class="hero landing" id="landing">
+            <h1>El Pollo Loco</h1>
+            <p>Hilf Pepe durch die Wüste, sammle Münzen und meistere den Endboss.</p>
+            <div class="hero-actions">
+                <button class="btn primary" onclick="startGame()">Spiel starten</button>
+                <button class="btn" onclick="openModal('how')">So geht's</button>
+                <button class="btn" onclick="openModal('controls')">Tasten</button>
+                <button class="btn ghost" onclick="openModal('story')">Story</button>
+                <button class="btn ghost" onclick="toggleFullscreen()">Fullscreen</button>
+            </div>
+        </section>
 
-    <canvas  id="canvas" width="720" height="480"></canvas>
+
 </body>
 
 

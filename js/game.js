@@ -3,18 +3,15 @@ let world;
 let keyboard = new Keyboard(); 
 
 
-
-
-
 function init() {
     canvas = document.getElementById("canvas");
     world = new World(canvas, keyboard);
-    console.log("My Caracter is", world.character);
-    console.log("My Enemies are", world.enemies);
 }
 
 
+
 document.addEventListener("keydown", (event) => {
+
     if (event.key === "ArrowRight") {
         keyboard.right = true;
     }
