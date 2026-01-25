@@ -2,6 +2,7 @@ let canvas;
 let world;
 let keyboard = new Keyboard();
 let gameStarted = false;
+let musicListenerAttached = false;
 
 function init() {
     canvas = document.getElementById("canvas");
@@ -13,6 +14,8 @@ function startGame() {
     gameStarted = true;
     hideLanding();
     hideEndScreen();
+    startBackgroundMusic();
+    startGameMusic();
     init();
 }
 
@@ -50,6 +53,7 @@ function restartGame() {
     stopCurrentWorld();
     hideEndScreen();
     gameStarted = true;
+    level1 = createLevel1();
     init();
 }
 
@@ -58,6 +62,7 @@ function backToHome() {
     hideEndScreen();
     showLanding();
     gameStarted = false;
+    level1 = createLevel1();
 }
 
 function stopCurrentWorld() {
@@ -170,3 +175,72 @@ function startLandingWhenReady() {
 }
 
 startLandingWhenReady();
+
+function startBackgroundMusic() {
+    const bgMusic = getAudio("bg-music");
+    if (!bgMusic) return;
+    bgMusic.volume = 0.02;
+    bgMusic.muted = false;
+    playTrack(bgMusic, () => startBackgroundMusic());
+}
+
+function startGameMusic() {
+    const gameMusic = getAudio("game-music");
+    if (!gameMusic) return;
+    gameMusic.volume = 0.2;
+    gameMusic.muted = false;
+    playTrack(gameMusic, () => startGameMusic());
+}
+
+function getAudio(id) {
+    return document.getElementById(id);
+}
+
+function playTrack(audio, retryFn) {
+    const playPromise = audio.play();
+    if (playPromise && typeof playPromise.catch === "function") {
+        playPromise.catch(() => runOnFirstInteraction(retryFn));
+    }
+}
+
+function pauseOtherTracks(activeId) {
+    const tracks = ["bg-music", "game-music"];
+    tracks.forEach((trackId) => {
+        if (trackId === activeId) return;
+        const track = getAudio(trackId);
+        if (!track) return;
+        track.pause();
+        track.currentTime = 0;
+    });
+}
+
+function setBackgroundMusicLevel(volume) {
+    const bgMusic = getAudio("bg-music");
+    if (!bgMusic) return;
+    bgMusic.volume = volume;
+}
+
+function runOnFirstInteraction(fn) {
+    if (musicListenerAttached) return;
+    const handler = () => handleFirstInteraction(fn, handler);
+    addMusicStartListeners(handler);
+    musicListenerAttached = true;
+}
+
+function handleFirstInteraction(fn, handler) {
+    fn();
+    removeMusicStartListeners(handler);
+    musicListenerAttached = false;
+}
+
+function addMusicStartListeners(handler) {
+    document.addEventListener("click", handler);
+    document.addEventListener("keydown", handler);
+    document.addEventListener("touchstart", handler);
+}
+
+function removeMusicStartListeners(handler) {
+    document.removeEventListener("click", handler);
+    document.removeEventListener("keydown", handler);
+    document.removeEventListener("touchstart", handler);
+}
