@@ -14,7 +14,7 @@ class Chicken extends MovableObject{
 
     constructor(){
         super().loadImage('img_pollo_locco/img/3_enemies_chicken/chicken_normal/1_walk/1_w.png');
-        this.x = 200 + Math.random() * 500; // random position
+        this.x = 900 + Math.random() * 900; // keep early area safe
         this.loadImages(this.images_Walking);
         this.speed = 0.15 + Math.random() * 0.25; // random speed between 0.15 and 0.4
 
@@ -25,10 +25,12 @@ class Chicken extends MovableObject{
     animate(){
 
         setInterval(() => {
+            if (this.world && this.world.isStopped) return;
             this.moveLeft();
         }, 1000/60);
 
         setInterval(() => {
+            if (this.world && this.world.isStopped) return;
             
             this.playAnimation(this.images_Walking);
              
@@ -41,4 +43,3 @@ class Chicken extends MovableObject{
 
 
 }
-

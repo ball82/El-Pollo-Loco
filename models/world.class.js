@@ -10,6 +10,9 @@ class World {
     camera_x = 0;
     statusBar = new StatusBar();
     throwableObjects = [];
+    isStopped = false;
+    isGameOver = false;
+    mainInterval;
 
     constructor(canvas, keyboard){
         this.ctx = canvas.getContext("2d");
@@ -22,13 +25,15 @@ class World {
 
     setWorld(){
         this.character.world = this;
+        this.enemies.forEach(enemy => enemy.world = this);
     } 
 
     run(){
-        setInterval(() => {
+        this.mainInterval = setInterval(() => {
+            if (this.isStopped) return;
             this.checkCollisions();
             this.checkThrowObjects();
-
+            this.checkGameEnd();
         }, 200);
     }
 
@@ -46,6 +51,29 @@ class World {
                 this.statusBar.setPercentage(this.character.energy);
             }
         });
+    }
+
+    checkGameEnd() {
+        if (this.isGameOver) return;
+        if (this.character.isDead()) {
+            this.endGame(false);
+            return;
+        }
+        if (this.character.x >= this.level.level_end_x) {
+            this.endGame(true);
+        }
+    }
+
+    endGame(isWin) {
+        this.isGameOver = true;
+        this.isStopped = true;
+        if (typeof showEndScreen === "function") {
+            showEndScreen(isWin);
+        }
+    }
+
+    stop() {
+        this.isStopped = true;
     }
 
     draw() {

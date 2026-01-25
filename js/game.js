@@ -12,12 +12,68 @@ function startGame() {
     if (gameStarted) return;
     gameStarted = true;
     hideLanding();
+    hideEndScreen();
     init();
 }
 
 function hideLanding() {
     const landing = document.getElementById("landing");
     if (landing) landing.classList.add("hidden");
+}
+
+function showLanding() {
+    const landing = document.getElementById("landing");
+    if (landing) landing.classList.remove("hidden");
+}
+
+function showEndScreen(isWin) {
+    const endscreen = document.getElementById("endscreen");
+    const title = document.getElementById("end-title");
+    const text = document.getElementById("end-text");
+    if (!endscreen || !title || !text) return;
+    if (isWin) {
+        title.textContent = "Gewonnen!";
+        text.textContent = "Stark! Du hast den Endboss besiegt.";
+    } else {
+        title.textContent = "Game Over";
+        text.textContent = "Du hast verloren. Versuch es nochmal!";
+    }
+    endscreen.classList.remove("hidden");
+}
+
+function hideEndScreen() {
+    const endscreen = document.getElementById("endscreen");
+    if (endscreen) endscreen.classList.add("hidden");
+}
+
+function restartGame() {
+    stopCurrentWorld();
+    hideEndScreen();
+    gameStarted = true;
+    init();
+}
+
+function backToHome() {
+    stopCurrentWorld();
+    hideEndScreen();
+    showLanding();
+    gameStarted = false;
+}
+
+function stopCurrentWorld() {
+    if (!world) return;
+    world.stop();
+    world = null;
+    resetKeyboard();
+}
+
+function resetKeyboard() {
+    keyboard.left = false;
+    keyboard.right = false;
+    keyboard.up = false;
+    keyboard.down = false;
+    keyboard.space = false;
+    keyboard.D = false;
 }
 
 function openModal(type) {
@@ -85,7 +141,7 @@ document.addEventListener("keyup", (event) => {
     if (!world) return;
     if (event.key === "ArrowRight") {
         keyboard.right = false;
-    }
+    }                   
     if (event.key === "ArrowLeft") {
         keyboard.left = false;
     }
