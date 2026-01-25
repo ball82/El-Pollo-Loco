@@ -4,20 +4,56 @@ class World {
     enemies = level1.enemies;
     clouds = level1.clouds;
     backgroundObjects = level1.backgroundObjects;
+    coins = level1.coins;
+    bottles = level1.bottles;
     canves;
     ctx;    
     keyboard;
     camera_x = 0;
-    statusBar = new StatusBar();
+    statusBar;
+    coinStatusBar;
+    bottleStatusBar;
     throwableObjects = [];
     isStopped = false;
     isGameOver = false;
     mainInterval;
 
+    healthImages = [
+        'img_pollo_locco/img/7_statusbars/1_statusbar/2_statusbar_health/green/0.png',
+        'img_pollo_locco/img/7_statusbars/1_statusbar/2_statusbar_health/green/20.png',
+        'img_pollo_locco/img/7_statusbars/1_statusbar/2_statusbar_health/green/40.png',
+        'img_pollo_locco/img/7_statusbars/1_statusbar/2_statusbar_health/green/60.png',
+        'img_pollo_locco/img/7_statusbars/1_statusbar/2_statusbar_health/green/80.png',
+        'img_pollo_locco/img/7_statusbars/1_statusbar/2_statusbar_health/green/100.png'
+    ];
+
+    coinImages = [
+        'img_pollo_locco/img/7_statusbars/1_statusbar/1_statusbar_coin/orange/0.png',
+        'img_pollo_locco/img/7_statusbars/1_statusbar/1_statusbar_coin/orange/20.png',
+        'img_pollo_locco/img/7_statusbars/1_statusbar/1_statusbar_coin/orange/40.png',
+        'img_pollo_locco/img/7_statusbars/1_statusbar/1_statusbar_coin/orange/60.png',
+        'img_pollo_locco/img/7_statusbars/1_statusbar/1_statusbar_coin/orange/80.png',
+        'img_pollo_locco/img/7_statusbars/1_statusbar/1_statusbar_coin/orange/100.png'
+    ];
+
+    bottleImages = [
+        'img_pollo_locco/img/7_statusbars/1_statusbar/3_statusbar_bottle/orange/0.png',
+        'img_pollo_locco/img/7_statusbars/1_statusbar/3_statusbar_bottle/orange/20.png',
+        'img_pollo_locco/img/7_statusbars/1_statusbar/3_statusbar_bottle/orange/40.png',
+        'img_pollo_locco/img/7_statusbars/1_statusbar/3_statusbar_bottle/orange/60.png',
+        'img_pollo_locco/img/7_statusbars/1_statusbar/3_statusbar_bottle/orange/80.png',
+        'img_pollo_locco/img/7_statusbars/1_statusbar/3_statusbar_bottle/orange/100.png'
+    ];
+
     constructor(canvas, keyboard){
         this.ctx = canvas.getContext("2d");
         this.canves = canvas;
         this.keyboard = keyboard;
+        this.statusBar = new StatusBar(this.healthImages, 40, 0);
+        this.coinStatusBar = new StatusBar(this.coinImages, 40, 60);
+        this.bottleStatusBar = new StatusBar(this.bottleImages, 40, 120);
+        this.coinStatusBar.setPercentage(0);
+        this.bottleStatusBar.setPercentage(0);
         this.draw();
         this.setWorld();
         this.run();
@@ -26,6 +62,8 @@ class World {
     setWorld(){
         this.character.world = this;
         this.enemies.forEach(enemy => enemy.world = this);
+        this.coins.forEach(coin => coin.world = this);
+        this.bottles.forEach(bottle => bottle.world = this);
     } 
 
     run(){
@@ -33,6 +71,7 @@ class World {
             if (this.isStopped) return;
             this.checkCollisions();
             this.checkThrowObjects();
+            this.checkCollectables();
             this.checkGameEnd();
         }, 200);
     }
@@ -51,6 +90,27 @@ class World {
                 this.statusBar.setPercentage(this.character.energy);
             }
         });
+    }
+
+    checkCollectables(){
+        this.collectFromArray(this.coins, (index) => {
+            this.character.coins = Math.min(100, this.character.coins + 20);
+            this.coinStatusBar.setPercentage(this.character.coins);
+            this.coins.splice(index, 1);
+        });
+        this.collectFromArray(this.bottles, (index) => {
+            this.character.bottles = Math.min(100, this.character.bottles + 20);
+            this.bottleStatusBar.setPercentage(this.character.bottles);
+            this.bottles.splice(index, 1);
+        });
+    }
+
+    collectFromArray(items, onCollect){
+        for (let i = items.length - 1; i >= 0; i--) {
+            if(this.character.isColliding(items[i])){
+                onCollect(i);
+            }
+        }
     }
 
     checkGameEnd() {
@@ -86,11 +146,15 @@ class World {
 
         this.ctx.translate(-this.camera_x, 0);  
         this.addToMap(this.statusBar);
+        this.addToMap(this.coinStatusBar);
+        this.addToMap(this.bottleStatusBar);
         this.ctx.translate(this.camera_x, 0) ;
 
         this.addToMap(this.character);
         this.addObject(this.enemies);
         this.addObject(this.clouds);
+        this.addObject(this.coins);
+        this.addObject(this.bottles);
         this.addObject(this.throwableObjects);
         this.ctx.translate(-this.camera_x, 0);  
 
