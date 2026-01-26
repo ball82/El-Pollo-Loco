@@ -49,6 +49,7 @@ class World {
         this.ctx = canvas.getContext("2d");
         this.canves = canvas;
         this.keyboard = keyboard;
+        this.showHitboxes = false;
         this.statusBar = new StatusBar(this.healthImages, 40, 0);
         this.coinStatusBar = new StatusBar(this.coinImages, 40, 60);
         this.bottleStatusBar = new StatusBar(this.bottleImages, 40, 120);
@@ -84,12 +85,45 @@ class World {
     }
 
     checkCollisions() {
-        this.enemies.forEach((enemy) => {
-            if(this.character.isColliding(enemy)){
-                this.character.hit();
-                this.statusBar.setPercentage(this.character.energy);
+        for (let i = this.enemies.length - 1; i >= 0; i--) {
+            let enemy = this.enemies[i];
+            if (enemy.isDead) continue;
+            if (!this.character.isColliding(enemy)) continue;
+
+            if (this.isStompingEnemy(enemy)) {
+                this.handleStomp(enemy, i);
+            } else {
+                this.handleEnemyHit();
             }
-        });
+        }
+    }
+
+    isStompingEnemy(enemy) {
+        let characterBottom = this.character.y + this.character.height;
+        let enemyTop = enemy.y;
+        return this.character.speedY < 0 && (characterBottom - enemyTop) < 20;
+    }
+
+    handleStomp(enemy, index) {
+        if (enemy instanceof Chicken) {
+            this.killChicken(enemy);
+        } else {
+            this.enemies.splice(index, 1);
+        }
+        this.character.speedY = 10; // bounce after stomp
+    }
+
+    killChicken(enemy) {
+        enemy.die();
+        setTimeout(() => {
+            let index = this.enemies.indexOf(enemy);
+            if (index !== -1) this.enemies.splice(index, 1);
+        }, 2000);
+    }
+
+    handleEnemyHit() {
+        this.character.hit();
+        this.statusBar.setPercentage(this.character.energy);
     }
 
     checkCollectables(){
@@ -177,7 +211,9 @@ class World {
         }
 
         mo.draw(this.ctx);
-        mo.drawFrame(this.ctx);
+        if (this.showHitboxes) {
+            mo.drawFrame(this.ctx);
+        }
 
         if(mo.otherDirection){
             this.flipImageBack(mo);

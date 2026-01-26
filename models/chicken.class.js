@@ -3,6 +3,8 @@ class Chicken extends MovableObject{
     y= 370;
     height= 60;
     width= 60;
+    isDead = false;
+    deadAt = 0;
     images_Walking = [
         'img_pollo_locco/img/3_enemies_chicken/chicken_normal/1_walk/1_w.png',
         'img_pollo_locco/img/3_enemies_chicken/chicken_normal/1_walk/2_w.png',
@@ -22,11 +24,13 @@ class Chicken extends MovableObject{
     animate(){
         setInterval(() => {
             if (this.world && this.world.isStopped) return;
+            if (this.isDead) return;
             this.moveLeft();
         }, 1000/60);
 
         setInterval(() => {
             if (this.world && this.world.isStopped) return;
+            if (this.isDead) return;
             
             this.playAnimation(this.images_Walking);
              
@@ -34,5 +38,12 @@ class Chicken extends MovableObject{
                 this.CurrentImage = 0;
             }
         }, 200);
+    }
+
+    die(){
+        if (this.isDead) return;
+        this.isDead = true;
+        this.deadAt = Date.now();
+        this.loadImage('img_pollo_locco/img/3_enemies_chicken/chicken_normal/2_dead/dead.png');
     }
 }
