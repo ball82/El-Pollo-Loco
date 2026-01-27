@@ -105,7 +105,9 @@ class World {
     }
 
     handleStomp(enemy, index) {
-        if (enemy instanceof Chicken || enemy instanceof SmallChicken) {
+        if (enemy instanceof Endboss) {
+            enemy.die();
+        } else if (enemy instanceof Chicken || enemy instanceof SmallChicken) {
             this.killChicken(enemy);
         } else {
             this.enemies.splice(index, 1);
@@ -153,9 +155,14 @@ class World {
             this.endGame(false);
             return;
         }
-        if (this.character.x >= this.level.level_end_x) {
+        if (this.isEndbossDefeated()) {
             this.endGame(true);
         }
+    }
+
+    isEndbossDefeated() {
+        const endboss = this.enemies.find(enemy => enemy instanceof Endboss);
+        return !endboss || endboss.isDead;
     }
 
     endGame(isWin) {
