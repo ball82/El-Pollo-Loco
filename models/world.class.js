@@ -101,11 +101,11 @@ class World {
     isStompingEnemy(enemy) {
         let characterBottom = this.character.y + this.character.height;
         let enemyTop = enemy.y;
-        return this.character.speedY < 0 && (characterBottom - enemyTop) < 20;
+        return this.character.speedY < 0 && (characterBottom - enemyTop) < 40;
     }
 
     handleStomp(enemy, index) {
-        if (enemy instanceof Chicken) {
+        if (enemy instanceof Chicken || enemy instanceof SmallChicken) {
             this.killChicken(enemy);
         } else {
             this.enemies.splice(index, 1);

@@ -7,6 +7,8 @@ function createLevel1(){
             new Chicken(), 
             new Chicken(), 
             new Chicken(),
+            new SmallChicken(),
+            new SmallChicken(),
             endboss,
         ],
         [
