@@ -3,6 +3,7 @@ class Endboss extends MovableObject {
     height = 350;
     width = 220;   
     y = 100;
+    isDead = false;
 
 
     images_Walking = [
@@ -27,8 +28,14 @@ class Endboss extends MovableObject {
     animate(){
         setInterval(() => {
             if (this.world && this.world.isStopped) return;
+            if (this.isDead) return;
             this.playAnimation(this.images_Walking);
         }, 160);
+    }
+
+    die() {
+        if (this.isDead) return;
+        this.isDead = true;
     }
 
 }

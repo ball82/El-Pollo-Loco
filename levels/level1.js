@@ -1,12 +1,14 @@
 function createLevel1(){
     const endboss = new Endboss();
-    endboss.x = 719 * 3;
+    endboss.x = 719 * 3 + 450;
 
     return new Level(
         [
             new Chicken(), 
             new Chicken(), 
             new Chicken(),
+            new SmallChicken(),
+            new SmallChicken(),
             endboss,
         ],
         [
@@ -64,7 +66,7 @@ function createLevel1(){
             new Bottle(1250, 360),
             new Bottle(1650, 360)
         ],
-        719 * 3
+        719 * 3 + 70
     );
 }
 

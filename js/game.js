@@ -179,7 +179,7 @@ startLandingWhenReady();
 function startBackgroundMusic() {
     const bgMusic = getAudio("bg-music");
     if (!bgMusic) return;
-    bgMusic.volume = 0.02;
+    bgMusic.volume = 0.004;
     bgMusic.muted = false;
     playTrack(bgMusic, () => startBackgroundMusic());
 }

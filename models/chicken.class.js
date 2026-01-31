@@ -1,5 +1,4 @@
-class Chicken extends MovableObject{
-
+class Chicken extends BaseChicken{
     y= 370;
     height= 60;
     width= 60;
@@ -8,31 +7,12 @@ class Chicken extends MovableObject{
         'img_pollo_locco/img/3_enemies_chicken/chicken_normal/1_walk/2_w.png',
         'img_pollo_locco/img/3_enemies_chicken/chicken_normal/1_walk/3_w.png',
     ];
+    deadImage = 'img_pollo_locco/img/3_enemies_chicken/chicken_normal/2_dead/dead.png';
+    speedMin = 0.15;
+    speedRange = 0.25;
 
     constructor(){
-        super().loadImage('img_pollo_locco/img/3_enemies_chicken/chicken_normal/1_walk/1_w.png');
-        this.x = 900 + Math.random() * 900; // keep early area safe
-        this.loadImages(this.images_Walking);
-        this.speed = 0.15 + Math.random() * 0.25; // random speed between 0.15 and 0.4
-
-        this.animate(); 
-        
-    }
-
-    animate(){
-        setInterval(() => {
-            if (this.world && this.world.isStopped) return;
-            this.moveLeft();
-        }, 1000/60);
-
-        setInterval(() => {
-            if (this.world && this.world.isStopped) return;
-            
-            this.playAnimation(this.images_Walking);
-             
-            if(this.CurrentImage >= this.images_Walking.length){
-                this.CurrentImage = 0;
-            }
-        }, 200);
+        super();
+        this.initChicken();
     }
 }
