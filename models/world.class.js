@@ -17,6 +17,7 @@ class World {
     isStopped = false;
     isGameOver = false;
     mainInterval;
+    lastThrow = 0;
 
     healthImages = [
         'img_pollo_locco/img/7_statusbars/1_statusbar/2_statusbar_health/green/0.png',
@@ -72,15 +73,28 @@ class World {
             this.checkCollisions();
             this.checkThrowObjects();
             this.checkCollectables();
+            this.checkThrowableHits();
             this.checkGameEnd();
         }, 200);
     }
 
     checkThrowObjects() {
-        if (this.keyboard.D) {
-            let bottle = new ThowableObject(this.character.x + 100, this.character.y + 100);
-            this.throwableObjects.push(bottle);
-        }
+        if (!this.keyboard.D) return;
+        if (!this.canThrowBottle()) return;
+        let bottle = new ThowableObject(this.character.x + 100, this.character.y + 100);
+        this.throwableObjects.push(bottle);
+        this.consumeBottle();
+    }
+
+    canThrowBottle(){
+        let timepassed = new Date().getTime() - this.lastThrow;
+        return this.character.bottles >= 20 && timepassed > 400;
+    }
+
+    consumeBottle(){
+        this.lastThrow = new Date().getTime();
+        this.character.bottles = Math.max(0, this.character.bottles - 20);
+        this.bottleStatusBar.setPercentage(this.character.bottles);
     }
 
     checkCollisions() {
@@ -110,6 +124,31 @@ class World {
             if(this.character.isColliding(items[i])){
                 onCollect(i);
             }
+        }
+    }
+
+    checkThrowableHits(){
+        for (let i = this.throwableObjects.length - 1; i >= 0; i--) {
+            const bottle = this.throwableObjects[i];
+            for (let j = this.enemies.length - 1; j >= 0; j--) {
+                const enemy = this.enemies[j];
+                if (bottle.isColliding(enemy)) {
+                    this.handleEnemyHit(enemy, j);
+                    this.throwableObjects.splice(i, 1);
+                    break;
+                }
+            }
+        }
+    }
+
+    handleEnemyHit(enemy, enemyIndex){
+        if (enemy instanceof Endboss) {
+            enemy.hit();
+            if (enemy.isDead()) {
+                this.enemies.splice(enemyIndex, 1);
+            }
+        } else {
+            this.enemies.splice(enemyIndex, 1);
         }
     }
 
