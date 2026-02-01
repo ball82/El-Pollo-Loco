@@ -211,7 +211,9 @@ class World {
             if (typeof playSfx === "function") {
                 playSfx("bottle-hit", 0.45);
             }
-            if (enemy.isDead) this.enemies.splice(enemyIndex, 1);
+            if (enemy.isDead) {
+                // keep boss for dead animation; removal handled in checkGameEnd
+            }
         } else {
             this.enemies.splice(enemyIndex, 1);
         }
@@ -224,6 +226,16 @@ class World {
             return;
         }
         if (this.isEndbossDefeated()) {
+            const endboss = this.enemies.find(enemy => enemy instanceof Endboss);
+            const deadStartedAt = endboss?.deadStartedAt || 0;
+            const deadDuration = endboss?.getDeadAnimationDuration?.() || 0;
+            if (deadStartedAt && Date.now() - deadStartedAt < deadDuration) {
+                return;
+            }
+            if (endboss) {
+                const index = this.enemies.indexOf(endboss);
+                if (index !== -1) this.enemies.splice(index, 1);
+            }
             this.endGame(true);
         }
     }

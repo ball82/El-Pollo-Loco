@@ -268,10 +268,18 @@ function setupViewportResize() {
 
 function resizeCanvasToViewport() {
     if (!canvas) return;
-    const isMobile = window.matchMedia("(pointer: coarse)").matches;
-    if (!isMobile) return;
-    canvas.width = window.innerWidth;
-    canvas.height = window.innerHeight;
+    const isMobile =
+        window.matchMedia("(pointer: coarse)").matches ||
+        window.matchMedia("(max-width: 1024px)").matches;
+    if (!isMobile) {
+        canvas.style.width = "";
+        canvas.style.height = "";
+        return;
+    }
+    canvas.width = 720;
+    canvas.height = 480;
+    canvas.style.width = "100vw";
+    canvas.style.height = "100vh";
 }
 
 function startBackgroundMusic() {

@@ -8,7 +8,10 @@ function createLevel1(){
             new Chicken(), 
             new Chicken(),
             new SmallChicken(),
+            new SmallChicken(720, 0),
+            new Chicken(720, 0),
             new SmallChicken(),
+            new Chicken(),
             endboss,
         ],
         [
@@ -64,7 +67,9 @@ function createLevel1(){
             new Bottle(650, 360),
             new Bottle(900, 360),
             new Bottle(1250, 360),
-            new Bottle(1650, 360)
+            new Bottle(1650, 360),
+            new Bottle(1950, 360),
+            new Bottle(2200, 360),
         ],
         720 * 3 + 70
     );

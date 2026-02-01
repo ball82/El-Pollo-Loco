@@ -6,6 +6,8 @@ class Endboss extends MovableObject {
     isDead = false;
     hitsTaken = 0;
     maxHits = 3;
+    deadStartedAt = 0;
+    deadFrameTime = 180;
 
 
     images_Walking = [
@@ -22,6 +24,12 @@ class Endboss extends MovableObject {
     constructor(){
         super().loadImage(this.images_Walking[0]);
         this.loadImages(this.images_Walking);
+        this.images_Dead = [
+            'img_pollo_locco/img/4_enemie_boss_chicken/5_dead/G24.png',
+            'img_pollo_locco/img/4_enemie_boss_chicken/5_dead/G25.png',
+            'img_pollo_locco/img/4_enemie_boss_chicken/5_dead/G26.png'
+        ];
+        this.loadImages(this.images_Dead);
         this.x = 1800;
         this.animate();
         
@@ -38,6 +46,25 @@ class Endboss extends MovableObject {
     die() {
         if (this.isDead) return;
         this.isDead = true;
+        this.deadStartedAt = Date.now();
+        this.playDeadAnimation();
+    }
+
+    playDeadAnimation() {
+        let frame = 0;
+        const interval = setInterval(() => {
+            if (frame >= this.images_Dead.length) {
+                clearInterval(interval);
+                return;
+            }
+            this.path = this.images_Dead[frame];
+            this.img = this.imageCache[this.path];
+            frame += 1;
+        }, this.deadFrameTime);
+    }
+
+    getDeadAnimationDuration() {
+        return this.images_Dead.length * this.deadFrameTime;
     }
 
     hit() {
