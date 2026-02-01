@@ -54,8 +54,9 @@ class World {
         this.statusBar = new StatusBar(this.healthImages, 40, 0);
         this.coinStatusBar = new StatusBar(this.coinImages, 40, 60);
         this.bottleStatusBar = new StatusBar(this.bottleImages, 40, 120);
-        this.coinStatusBar.setPercentage(0);
-        this.bottleStatusBar.setPercentage(0);
+        this.statusBar.setPercentage(this.character.energy);
+        this.coinStatusBar.setPercentage(this.character.coins);
+        this.bottleStatusBar.setPercentage(this.character.bottles);
         this.draw();
         this.setWorld();
         this.run();
@@ -76,7 +77,7 @@ class World {
             this.checkCollectables();
             this.checkThrowableHits();
             this.checkGameEnd();
-        }, 200);
+        }, 1000 / 60);
     }
 
     checkThrowObjects() {
@@ -102,6 +103,7 @@ class World {
     }
 
     checkCollisions() {
+        if (this.character.isDead()) return;
         for (let i = this.enemies.length - 1; i >= 0; i--) {
             let enemy = this.enemies[i];
             if (enemy.isDead) continue;
@@ -118,7 +120,11 @@ class World {
     isStompingEnemy(enemy) {
         let characterBottom = this.character.y + this.character.height;
         let enemyTop = enemy.y;
-        return this.character.speedY < 0 && (characterBottom - enemyTop) < 40;
+        return (
+            this.character.speedY < 0 &&
+            this.character.y < enemy.y &&
+            characterBottom <= enemyTop + 40
+        );
     }
 
     handleStomp(enemy, index) {
@@ -142,6 +148,7 @@ class World {
 
     handleCharacterHit() {
         const wasHurt = this.character.isHurt();
+        if (wasHurt) return;
         this.character.hit();
         this.statusBar.setPercentage(this.character.energy);
         if (!wasHurt && typeof playSfx === "function") {
@@ -173,23 +180,38 @@ class World {
     checkThrowableHits(){
         for (let i = this.throwableObjects.length - 1; i >= 0; i--) {
             const bottle = this.throwableObjects[i];
+            if (bottle.isMarkedForRemoval) {
+                this.throwableObjects.splice(i, 1);
+                continue;
+            }
+            if (bottle.hasHit) continue;
             for (let j = this.enemies.length - 1; j >= 0; j--) {
                 const enemy = this.enemies[j];
                 if (bottle.isColliding(enemy)) {
-                    this.handleThrowableHit(enemy, j);
-                    this.throwableObjects.splice(i, 1);
+                    this.handleThrowableHit(enemy, j, bottle);
+                    if (!(enemy instanceof Endboss)) {
+                        this.throwableObjects.splice(i, 1);
+                    }
                     break;
                 }
             }
         }
     }
 
-    handleThrowableHit(enemy, enemyIndex){
+    handleThrowableHit(enemy, enemyIndex, bottle){
         if (enemy instanceof Endboss) {
             enemy.hit();
-            if (enemy.isDead) {
-                this.enemies.splice(enemyIndex, 1);
+            if (bottle) {
+                const bossCenter = enemy.x + enemy.width / 2;
+                const bottleCenter = bottle.x + bottle.width / 2;
+                const offset = bottleCenter < bossCenter ? 20 : -20;
+                bottle.x += offset;
+                bottle.splash();
             }
+            if (typeof playSfx === "function") {
+                playSfx("bottle-hit", 0.45);
+            }
+            if (enemy.isDead) this.enemies.splice(enemyIndex, 1);
         } else {
             this.enemies.splice(enemyIndex, 1);
         }
@@ -214,6 +236,9 @@ class World {
     endGame(isWin) {
         this.isGameOver = true;
         this.isStopped = true;
+        if (typeof stopAllSounds === "function") {
+            stopAllSounds();
+        }
         if (typeof showEndScreen === "function") {
             showEndScreen(isWin);
         }

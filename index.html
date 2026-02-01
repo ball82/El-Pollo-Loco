@@ -31,6 +31,13 @@
     <div class="page">
         <div id="game-area">
             <canvas id="canvas" width="720" height="480"></canvas>
+            <button class="btn ghost mute-toggle mute-floating" type="button">Sound: An</button>
+            <section class="rotate-overlay hidden" id="rotate-overlay">
+                <div class="rotate-card">
+                    <h2>Bitte drehen</h2>
+                    <p>Halte dein Gerät quer, um spielen zu können.</p>
+                </div>
+            </section>
             <section class="landing-overlay" id="landing">
                 <div class="landing-card">
                     <h1>El Pollo Loco</h1>
@@ -54,6 +61,16 @@
                     </div>
                 </div>
             </section>
+            <div class="mobile-controls" id="mobile-controls">
+                <div class="mobile-controls-row">
+                    <button class="mobile-btn" data-action="left">◀</button>
+                    <button class="mobile-btn" data-action="right">▶</button>
+                </div>
+                <div class="mobile-controls-row">
+                    <button class="mobile-btn" data-action="jump">⤒</button>
+                    <button class="mobile-btn" data-action="throw">🧴</button>
+                </div>
+            </div>
         </div>
     </div>
     <audio id="bg-music" src="./audio/BG-Music.mp3" loop></audio>
@@ -61,6 +78,7 @@
     <audio id="pepe-jump" src="./audio/pepe_jump.wav"></audio>
     <audio id="pepe-hurt" src="./audio/pepe_hurt.wav"></audio>
     <audio id="bottle-throw" src="./audio/bottle_throw.wav"></audio>
+    <audio id="bottle-hit" src="./audio/hit bottle.mp3"></audio>
 
     <div class="modal hidden" id="info-modal" onclick="closeModal()">
         <div class="modal-card" onclick="event.stopPropagation()">

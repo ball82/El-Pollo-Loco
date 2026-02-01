@@ -3,6 +3,9 @@ let world;
 let keyboard = new Keyboard();
 let gameStarted = false;
 let musicListenerAttached = false;
+let isMuted = false;
+let mobileControlsReady = false;
+let orientationGuardReady = false;
 
 function init() {
     canvas = document.getElementById("canvas");
@@ -14,7 +17,8 @@ function startGame() {
     gameStarted = true;
     hideLanding();
     hideEndScreen();
-    startBackgroundMusic();
+    stopAllSounds();
+    pauseOtherTracks("game-music");
     startGameMusic();
     init();
 }
@@ -27,6 +31,9 @@ function hideLanding() {
 function showLanding() {
     const landing = document.getElementById("landing");
     if (landing) landing.classList.remove("hidden");
+    stopAllSounds();
+    pauseOtherTracks("bg-music");
+    startBackgroundMusic();
 }
 
 function showEndScreen(isWin) {
@@ -54,6 +61,9 @@ function restartGame() {
     hideEndScreen();
     gameStarted = true;
     level1 = createLevel1();
+    stopAllSounds();
+    pauseOtherTracks("game-music");
+    startGameMusic();
     init();
 }
 
@@ -79,6 +89,70 @@ function resetKeyboard() {
     keyboard.down = false;
     keyboard.space = false;
     keyboard.D = false;
+}
+
+function setupMobileControls() {
+    if (mobileControlsReady) return;
+    const buttons = getMobileControlButtons();
+    if (buttons.length === 0) return;
+    const handlers = createMobileControlHandlers();
+    attachMobileControlHandlers(buttons, handlers);
+    mobileControlsReady = true;
+}
+
+function getMobileControlButtons() {
+    const container = document.getElementById("mobile-controls");
+    if (!container) return [];
+    return Array.from(container.querySelectorAll("[data-action]"));
+}
+
+function setMobileKey(action, pressed) {
+    if (action === "left") keyboard.left = pressed;
+    if (action === "right") keyboard.right = pressed;
+    if (action === "jump") keyboard.space = pressed;
+    if (action === "throw") keyboard.D = pressed;
+}
+
+function createMobileControlHandlers() {
+    const startHandler = (event) => {
+        event.preventDefault();
+        const action = event.currentTarget.dataset.action;
+        setMobileKey(action, true);
+    };
+    const endHandler = (event) => {
+        event.preventDefault();
+        const action = event.currentTarget.dataset.action;
+        setMobileKey(action, false);
+    };
+    return { startHandler, endHandler };
+}
+
+function attachMobileControlHandlers(buttons, handlers) {
+    buttons.forEach((button) => {
+        button.addEventListener("touchstart", handlers.startHandler, { passive: false });
+        button.addEventListener("touchend", handlers.endHandler, { passive: false });
+        button.addEventListener("touchcancel", handlers.endHandler, { passive: false });
+        button.addEventListener("mousedown", handlers.startHandler);
+        button.addEventListener("mouseup", handlers.endHandler);
+        button.addEventListener("mouseleave", handlers.endHandler);
+        button.addEventListener("contextmenu", (event) => event.preventDefault());
+    });
+}
+
+function setupOrientationGuard() {
+    if (orientationGuardReady) return;
+    const overlay = document.getElementById("rotate-overlay");
+    if (!overlay) return;
+    const isMobileView = () =>
+        window.matchMedia("(pointer: coarse)").matches || window.innerWidth <= 900;
+    const update = () => {
+        const portrait = window.matchMedia("(orientation: portrait)").matches;
+        overlay.classList.toggle("hidden", !(isMobileView() && portrait));
+    };
+    update();
+    window.addEventListener("resize", update);
+    window.addEventListener("orientationchange", update);
+    orientationGuardReady = true;
 }
 
 function openModal(type) {
@@ -135,7 +209,6 @@ document.addEventListener("keydown", (event) => {
     }
     if (event.key === " ") {
         keyboard.space = true;
-        world.character.jump();
     }
     if (event.key === "d") {
         keyboard.D = true;
@@ -168,19 +241,44 @@ function startLandingWhenReady() {
     if (document.readyState === "loading") {
         document.addEventListener("DOMContentLoaded", () => {
             canvas = document.getElementById("canvas");
+            resizeCanvasToViewport();
+            setupMobileControls();
+            setupOrientationGuard();
+            setupViewportResize();
+            setupMuteButtons();
+            startBackgroundMusic();
         });
     } else {
         canvas = document.getElementById("canvas");
+        resizeCanvasToViewport();
+        setupMobileControls();
+        setupOrientationGuard();
+        setupViewportResize();
+        setupMuteButtons();
+        startBackgroundMusic();
     }
 }
 
 startLandingWhenReady();
 
+function setupViewportResize() {
+    window.addEventListener("resize", resizeCanvasToViewport);
+    window.addEventListener("orientationchange", resizeCanvasToViewport);
+}
+
+function resizeCanvasToViewport() {
+    if (!canvas) return;
+    const isMobile = window.matchMedia("(pointer: coarse)").matches;
+    if (!isMobile) return;
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+}
+
 function startBackgroundMusic() {
     const bgMusic = getAudio("bg-music");
     if (!bgMusic) return;
     bgMusic.volume = 0.02;
-    bgMusic.muted = false;
+    bgMusic.muted = isMuted;
     playTrack(bgMusic, () => startBackgroundMusic());
 }
 
@@ -188,7 +286,7 @@ function startGameMusic() {
     const gameMusic = getAudio("game-music");
     if (!gameMusic) return;
     gameMusic.volume = 0.1;
-    gameMusic.muted = false;
+    gameMusic.muted = isMuted;
     playTrack(gameMusic, () => startGameMusic());
 }
 
@@ -206,6 +304,7 @@ function playTrack(audio, retryFn) {
 function playSfx(id, volume = 0.3) {
     const audio = getAudio(id);
     if (!audio) return;
+    if (isMuted) return;
     audio.volume = volume;
     audio.currentTime = 0;
     playTrack(audio, () => playSfx(id, volume));
@@ -226,6 +325,46 @@ function setBackgroundMusicLevel(volume) {
     const bgMusic = getAudio("bg-music");
     if (!bgMusic) return;
     bgMusic.volume = volume;
+}
+
+function stopAllSounds() {
+    const tracks = document.querySelectorAll("audio");
+    tracks.forEach((track) => {
+        track.pause();
+        track.currentTime = 0;
+    });
+}
+
+function toggleMute() {
+    isMuted = !isMuted;
+    setAllAudioMuted(isMuted);
+    if (isMuted) {
+        stopAllSounds();
+    }
+    updateMuteButtons();
+}
+
+function setAllAudioMuted(muted) {
+    const tracks = document.querySelectorAll("audio");
+    tracks.forEach((track) => {
+        track.muted = muted;
+    });
+}
+
+function setupMuteButtons() {
+    const buttons = document.querySelectorAll(".mute-toggle");
+    if (!buttons.length) return;
+    buttons.forEach((button) => {
+        button.addEventListener("click", toggleMute);
+    });
+    updateMuteButtons();
+}
+
+function updateMuteButtons() {
+    const buttons = document.querySelectorAll(".mute-toggle");
+    buttons.forEach((button) => {
+        button.textContent = isMuted ? "Sound: Aus" : "Sound: An";
+    });
 }
 
 function runOnFirstInteraction(fn) {
