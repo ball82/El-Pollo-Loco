@@ -85,6 +85,9 @@ class World {
         let bottle = new ThowableObject(this.character.x + 100, this.character.y + 100);
         this.throwableObjects.push(bottle);
         this.consumeBottle();
+        if (typeof playSfx === "function") {
+            playSfx("bottle-throw", 0.35);
+        }
     }
 
     canThrowBottle(){
@@ -107,7 +110,7 @@ class World {
             if (this.isStompingEnemy(enemy)) {
                 this.handleStomp(enemy, i);
             } else {
-                this.handleEnemyHit();
+                this.handleCharacterHit();
             }
         }
     }
@@ -137,9 +140,13 @@ class World {
         }, 2000);
     }
 
-    handleEnemyHit() {
+    handleCharacterHit() {
+        const wasHurt = this.character.isHurt();
         this.character.hit();
         this.statusBar.setPercentage(this.character.energy);
+        if (!wasHurt && typeof playSfx === "function") {
+            playSfx("pepe-hurt", 0.4);
+        }
     }
 
     checkCollectables(){
@@ -169,7 +176,7 @@ class World {
             for (let j = this.enemies.length - 1; j >= 0; j--) {
                 const enemy = this.enemies[j];
                 if (bottle.isColliding(enemy)) {
-                    this.handleEnemyHit(enemy, j);
+                    this.handleThrowableHit(enemy, j);
                     this.throwableObjects.splice(i, 1);
                     break;
                 }
@@ -177,10 +184,10 @@ class World {
         }
     }
 
-    handleEnemyHit(enemy, enemyIndex){
+    handleThrowableHit(enemy, enemyIndex){
         if (enemy instanceof Endboss) {
             enemy.hit();
-            if (enemy.isDead()) {
+            if (enemy.isDead) {
                 this.enemies.splice(enemyIndex, 1);
             }
         } else {

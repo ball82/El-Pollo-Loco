@@ -4,6 +4,8 @@ class Endboss extends MovableObject {
     width = 220;   
     y = 100;
     isDead = false;
+    hitsTaken = 0;
+    maxHits = 3;
 
 
     images_Walking = [
@@ -36,6 +38,14 @@ class Endboss extends MovableObject {
     die() {
         if (this.isDead) return;
         this.isDead = true;
+    }
+
+    hit() {
+        if (this.isDead) return;
+        this.hitsTaken += 1;
+        if (this.hitsTaken >= this.maxHits) {
+            this.die();
+        }
     }
 
 }

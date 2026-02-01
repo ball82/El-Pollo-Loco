@@ -10,7 +10,7 @@ class ThowableObject extends MovableObject {
     }
 
     trow(){
-        this.speedY = 30;
+        this.speedY = 12;
         this.applyGravity();
         setInterval(() => {
             this.x += 10;

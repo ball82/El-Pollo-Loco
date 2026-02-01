@@ -179,7 +179,7 @@ startLandingWhenReady();
 function startBackgroundMusic() {
     const bgMusic = getAudio("bg-music");
     if (!bgMusic) return;
-    bgMusic.volume = 0.004;
+    bgMusic.volume = 0.02;
     bgMusic.muted = false;
     playTrack(bgMusic, () => startBackgroundMusic());
 }
@@ -187,7 +187,7 @@ function startBackgroundMusic() {
 function startGameMusic() {
     const gameMusic = getAudio("game-music");
     if (!gameMusic) return;
-    gameMusic.volume = 0.2;
+    gameMusic.volume = 0.1;
     gameMusic.muted = false;
     playTrack(gameMusic, () => startGameMusic());
 }
@@ -201,6 +201,14 @@ function playTrack(audio, retryFn) {
     if (playPromise && typeof playPromise.catch === "function") {
         playPromise.catch(() => runOnFirstInteraction(retryFn));
     }
+}
+
+function playSfx(id, volume = 0.3) {
+    const audio = getAudio(id);
+    if (!audio) return;
+    audio.volume = volume;
+    audio.currentTime = 0;
+    playTrack(audio, () => playSfx(id, volume));
 }
 
 function pauseOtherTracks(activeId) {
