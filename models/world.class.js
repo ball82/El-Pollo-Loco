@@ -65,6 +65,7 @@ class World {
     setWorld(){
         this.character.world = this;
         this.enemies.forEach(enemy => enemy.world = this);
+        this.clouds.forEach(cloud => cloud.world = this);
         this.coins.forEach(coin => coin.world = this);
         this.bottles.forEach(bottle => bottle.world = this);
     } 

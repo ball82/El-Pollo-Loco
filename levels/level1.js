@@ -15,7 +15,13 @@ function createLevel1(){
             endboss,
         ],
         [
-            new Cloud(),
+            new Cloud(-720),
+            new Cloud(-120),
+            new Cloud(480),
+            new Cloud(1080),
+            new Cloud(1680),
+            new Cloud(2280),
+            new Cloud(2880),
         ],
         [
         new BackgroundObject('img_pollo_locco/img/5_background/layers/air.png', -720 * 3, 0),
