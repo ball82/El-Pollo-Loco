@@ -40,7 +40,7 @@ class Endboss extends MovableObject {
             if (this.world && this.world.isStopped) return;
             if (this.isDead) return;
             this.playAnimation(this.images_Walking);
-        }, 160);
+        }, 90);
     }
 
     die() {

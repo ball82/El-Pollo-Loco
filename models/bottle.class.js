@@ -20,6 +20,6 @@ class Bottle extends MovableObject {
         setInterval(() => {
             if (this.world && this.world.isStopped) return;
             this.playAnimation(this.images_OnGround);
-        }, 350);
+        }, 120);
     }
 }

@@ -8,8 +8,8 @@ class SmallChicken extends BaseChicken {
         'img_pollo_locco/img/3_enemies_chicken/chicken_small/1_walk/3_w.png',
     ];
     deadImage = 'img_pollo_locco/img/3_enemies_chicken/chicken_small/2_dead/dead.png';
-    speedMin = 0.2;
-    speedRange = 0.35;
+    speedMin = 0.4;
+    speedRange = 0.45;
 
     constructor() {
         super();

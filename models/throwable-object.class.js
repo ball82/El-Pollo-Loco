@@ -33,8 +33,8 @@ class ThowableObject extends MovableObject {
         this.speedY = 12;
         this.applyGravity();
         this.throwInterval = setInterval(() => {
-            this.x += 10;
-        }, 25);
+            this.x += 6.5;
+        }, 16);
     }
 
     animateRotation(){
@@ -63,7 +63,7 @@ class ThowableObject extends MovableObject {
             this.path = this.images_Splash[frame];
             this.img = this.imageCache[this.path];
             frame += 1;
-        }, 70);
+        }, 55);
     }
  
 }

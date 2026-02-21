@@ -108,7 +108,7 @@ class World {
         for (let i = this.enemies.length - 1; i >= 0; i--) {
             let enemy = this.enemies[i];
             if (enemy.isDead) continue;
-            if (!this.character.isColliding(enemy)) continue;
+            if (!this.isCharacterEnemyColliding(enemy)) continue;
 
             if (this.isStompingEnemy(enemy)) {
                 this.handleStomp(enemy, i);
@@ -125,6 +125,40 @@ class World {
             this.character.speedY < 0 &&
             this.character.y < enemy.y &&
             characterBottom <= enemyTop + 40
+        );
+    }
+
+    isCharacterEnemyColliding(enemy) {
+        const characterBox = this.getAdjustedBox(this.character, {
+            top: 10,
+            right: 18,
+            bottom: 10,
+            left: 18
+        });
+        const enemyOffset = enemy instanceof Endboss
+            ? { top: 30, right: 35, bottom: 25, left: 35 }
+            : { top: 6, right: 8, bottom: 4, left: 8 };
+        const enemyBox = this.getAdjustedBox(enemy, enemyOffset);
+        return this.boxesOverlap(characterBox, enemyBox);
+    }
+
+    getAdjustedBox(object, offset) {
+        const width = Math.max(1, object.width - offset.left - offset.right);
+        const height = Math.max(1, object.height - offset.top - offset.bottom);
+        return {
+            left: object.x + offset.left,
+            top: object.y + offset.top,
+            right: object.x + offset.left + width,
+            bottom: object.y + offset.top + height
+        };
+    }
+
+    boxesOverlap(a, b) {
+        return (
+            a.right > b.left &&
+            a.bottom > b.top &&
+            a.left < b.right &&
+            a.top < b.bottom
         );
     }
 
@@ -162,11 +196,17 @@ class World {
             this.character.coins = Math.min(100, this.character.coins + 20);
             this.coinStatusBar.setPercentage(this.character.coins);
             this.coins.splice(index, 1);
+            if (typeof playSfx === "function") {
+                playSfx("coin_insert", 0.15);
+            }
         });
         this.collectFromArray(this.bottles, (index) => {
             this.character.bottles = Math.min(100, this.character.bottles + 20);
             this.bottleStatusBar.setPercentage(this.character.bottles);
             this.bottles.splice(index, 1);
+            if (typeof playSfx === "function") {
+                playSfx("retract_bottles", 0.15);
+            }
         });
     }
 
@@ -252,6 +292,12 @@ class World {
         if (typeof stopAllSounds === "function") {
             stopAllSounds();
         }
+        if (isWin && typeof playSfx === "function") {
+            playSfx("win", 0.45);
+        }
+        if (!isWin && typeof playSfx === "function") {
+            playSfx("game-over", 0.45);
+        }
         if (typeof showEndScreen === "function") {
             showEndScreen(isWin);
         }
@@ -269,12 +315,6 @@ class World {
         this.ctx.drawImage(this.character.img, this.character.x, this.character.y, this.character.width, this.character.height);
         this.addObject(this.backgroundObjects); 
 
-        this.ctx.translate(-this.camera_x, 0);  
-        this.addToMap(this.statusBar);
-        this.addToMap(this.coinStatusBar);
-        this.addToMap(this.bottleStatusBar);
-        this.ctx.translate(this.camera_x, 0) ;
-
         this.addToMap(this.character);
         this.addObject(this.enemies);
         this.addObject(this.clouds);
@@ -282,6 +322,10 @@ class World {
         this.addObject(this.bottles);
         this.addObject(this.throwableObjects);
         this.ctx.translate(-this.camera_x, 0);  
+        
+        this.addToMap(this.statusBar);
+        this.addToMap(this.coinStatusBar);
+        this.addToMap(this.bottleStatusBar);
 
         let self = this;
         requestAnimationFrame(function() {

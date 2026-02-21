@@ -8,7 +8,7 @@ class Cloud extends MovableObject {
         super().loadImage('img_pollo_locco/img/5_background/layers/4_clouds/2.png');
         this.x = x;
         this.y = 20 + Math.random() * 60;
-        this.speed = 0.08 + Math.random() * 0.08;
+        this.speed = 0.18 + Math.random() * 0.12;
         this.animate();
     }
 

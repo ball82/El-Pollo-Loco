@@ -3,6 +3,7 @@ class Character extends MovableObject{
     height = 280;
     y = 80;
     speed = 17;
+    hitDamage = 20;
     width = 150;
     coins = 0;
     bottles = 0;
@@ -129,7 +130,7 @@ class Character extends MovableObject{
                     this.playAnimation(this.images_Idle);
                     }
                 }
-        }, 50);
+        }, 35);
     }
 
     jump() {
@@ -149,6 +150,15 @@ class Character extends MovableObject{
     isSleeping(){
         let timepassed = new Date().getTime() - this.lastAction;
         return timepassed > 15000;
+    }
+
+    hit() {
+        this.energy -= this.hitDamage;
+        if (this.energy < 0) {
+            this.energy = 0;
+        } else {
+            this.lastHit = new Date().getTime();
+        }
     }
 
 }

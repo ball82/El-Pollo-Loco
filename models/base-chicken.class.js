@@ -5,10 +5,10 @@ class BaseChicken extends MovableObject {
     deadImage = '';
     startXMin = 900;
     startXRange = 900;
-    speedMin = 0.15;
-    speedRange = 0.25;
+    speedMin = 0.28;
+    speedRange = 0.35;
     moveInterval = 1000 / 60;
-    walkInterval = 200;
+    walkInterval = 110;
 
     initChicken() {
         const firstImage = this.images_Walking[0];

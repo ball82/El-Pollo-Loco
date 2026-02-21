@@ -20,6 +20,6 @@ class Coin extends MovableObject {
         setInterval(() => {
             if (this.world && this.world.isStopped) return;
             this.playAnimation(this.images_Spinning);
-        }, 200);
+        }, 90);
     }
 }
