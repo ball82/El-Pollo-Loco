@@ -262,7 +262,7 @@ class World {
     getGroundChickenY(chicken) {
         if (chicken instanceof SmallChicken) return 400;
         return 370;
-    }
+     }
 
     processThrowableObject(index) {
         const bottle = this.throwableObjects[index];
