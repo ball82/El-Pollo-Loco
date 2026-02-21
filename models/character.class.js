@@ -101,7 +101,25 @@ class Character extends MovableObject{
         if (this.shouldPauseMovement()) return;
         this.handleHorizontalMovement();
         this.handleJumpInput();
-        this.world.camera_x = -this.x + 80;
+        this.world.camera_x = this.getClampedCameraX();
+    }
+
+    getClampedCameraX() {
+        const desiredCameraX = -this.x + 80;
+        const minCameraX = this.getMinCameraX();
+        return Math.min(0, Math.max(minCameraX, desiredCameraX));
+    }
+
+    getMinCameraX() {
+        const rightEdge = this.getBackgroundRightEdge();
+        const canvasWidth = this.world?.canves?.width || 720;
+        return Math.min(0, -(rightEdge - canvasWidth));
+    }
+
+    getBackgroundRightEdge() {
+        const backgrounds = this.world?.backgroundObjects || [];
+        if (!backgrounds.length) return 720;
+        return Math.max(...backgrounds.map((object) => object.x + object.width));
     }
 
     shouldPauseMovement(){

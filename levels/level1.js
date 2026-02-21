@@ -85,7 +85,7 @@ function createLevel1(){
             new Bottle(1950, 360),
             new Bottle(2200, 360),
         ],
-        720 * 3 + 70
+        endboss.x - 120
     );
 }
 
