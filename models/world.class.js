@@ -19,6 +19,8 @@ class World {
     mainInterval;
     animationFrameId;
     lastThrow = 0;
+    endbossSpawnInterval = 8000;
+    lastEndbossSpawn = 0;
 
     healthImages = [
         'img_pollo_locco/img/7_statusbars/1_statusbar/2_statusbar_health/green/0.png',
@@ -81,6 +83,7 @@ class World {
             this.checkThrowObjects();
             this.checkCollectables();
             this.checkThrowableHits();
+            this.checkEndbossSpawn();
             this.checkGameEnd();
         }, 1000 / 60);
     }
@@ -237,6 +240,28 @@ class World {
         for (let i = this.throwableObjects.length - 1; i >= 0; i--) {
             this.processThrowableObject(i);
         }
+    }
+
+    checkEndbossSpawn() {
+        const endboss = this.getEndboss();
+        if (!endboss || endboss.isDead) return;
+        const now = Date.now();
+        if (now - this.lastEndbossSpawn < this.endbossSpawnInterval) return;
+        this.spawnChickenFromEndboss(endboss);
+        this.lastEndbossSpawn = now;
+    }
+
+    spawnChickenFromEndboss(endboss) {
+        const chicken = Math.random() < 0.5 ? new SmallChicken() : new Chicken();
+        chicken.x = endboss.x + 30 + Math.random() * 110;
+        chicken.y = this.getGroundChickenY(chicken);
+        chicken.world = this;
+        this.enemies.push(chicken);
+    }
+
+    getGroundChickenY(chicken) {
+        if (chicken instanceof SmallChicken) return 400;
+        return 370;
     }
 
     processThrowableObject(index) {
