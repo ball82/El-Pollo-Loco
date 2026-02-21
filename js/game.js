@@ -2,8 +2,6 @@ let canvas;
 let world;
 let keyboard = new Keyboard();
 let gameStarted = false;
-let musicListenerAttached = false;
-let isMuted = false;
 let mobileControlsReady = false;
 let orientationGuardReady = false;
 
@@ -143,16 +141,22 @@ function setupOrientationGuard() {
     if (orientationGuardReady) return;
     const overlay = document.getElementById("rotate-overlay");
     if (!overlay) return;
-    const isMobileView = () =>
-        window.matchMedia("(pointer: coarse)").matches || window.innerWidth <= 900;
-    const update = () => {
-        const portrait = window.matchMedia("(orientation: portrait)").matches;
-        overlay.classList.toggle("hidden", !(isMobileView() && portrait));
-    };
+    const update = createOrientationUpdater(overlay);
     update();
     window.addEventListener("resize", update);
     window.addEventListener("orientationchange", update);
     orientationGuardReady = true;
+}
+
+function createOrientationUpdater(overlay) {
+    return () => {
+        const portrait = window.matchMedia("(orientation: portrait)").matches;
+        overlay.classList.toggle("hidden", !(isMobileView() && portrait));
+    };
+}
+
+function isMobileView() {
+    return window.matchMedia("(pointer: coarse)").matches || window.innerWidth <= 900;
 }
 
 function openModal(type) {
@@ -239,24 +243,20 @@ document.addEventListener("keyup", (event) => {
 
 function startLandingWhenReady() {
     if (document.readyState === "loading") {
-        document.addEventListener("DOMContentLoaded", () => {
-            canvas = document.getElementById("canvas");
-            resizeCanvasToViewport();
-            setupMobileControls();
-            setupOrientationGuard();
-            setupViewportResize();
-            setupMuteButtons();
-            startBackgroundMusic();
-        });
-    } else {
-        canvas = document.getElementById("canvas");
-        resizeCanvasToViewport();
-        setupMobileControls();
-        setupOrientationGuard();
-        setupViewportResize();
-        setupMuteButtons();
-        startBackgroundMusic();
+        document.addEventListener("DOMContentLoaded", setupLandingScreen);
+        return;
     }
+    setupLandingScreen();
+}
+
+function setupLandingScreen() {
+    canvas = document.getElementById("canvas");
+    resizeCanvasToViewport();
+    setupMobileControls();
+    setupOrientationGuard();
+    setupViewportResize();
+    initAudio();
+    startBackgroundMusic();
 }
 
 startLandingWhenReady();
@@ -268,134 +268,30 @@ function setupViewportResize() {
 
 function resizeCanvasToViewport() {
     if (!canvas) return;
-    const isMobile =
-        window.matchMedia("(pointer: coarse)").matches ||
-        window.matchMedia("(max-width: 1024px)").matches;
-    if (!isMobile) {
-        canvas.style.width = "";
-        canvas.style.height = "";
+    if (!isMobileCanvasViewport()) {
+        resetCanvasSize();
         return;
     }
+    fillCanvasViewport();
+}
+
+function isMobileCanvasViewport() {
+    return window.matchMedia("(pointer: coarse)").matches ||
+        window.matchMedia("(max-width: 1024px)").matches;
+}
+
+function resetCanvasSize() {
+    canvas.style.width = "";
+    canvas.style.height = "";
+}
+
+function fillCanvasViewport() {
     canvas.width = 720;
     canvas.height = 480;
     canvas.style.width = "100vw";
     canvas.style.height = "100vh";
-}
-
-function startBackgroundMusic() {
-    const bgMusic = getAudio("bg-music");
-    if (!bgMusic) return;
-    bgMusic.volume = 0.02;
-    bgMusic.muted = isMuted;
-    playTrack(bgMusic, () => startBackgroundMusic());
-}
-
-function startGameMusic() {
-    const gameMusic = getAudio("game-music");
-    if (!gameMusic) return;
-    gameMusic.volume = 0.1;
-    gameMusic.muted = isMuted;
-    playTrack(gameMusic, () => startGameMusic());
-}
-
-function getAudio(id) {
-    return document.getElementById(id);
-}
-
-function playTrack(audio, retryFn) {
-    const playPromise = audio.play();
-    if (playPromise && typeof playPromise.catch === "function") {
-        playPromise.catch(() => runOnFirstInteraction(retryFn));
+    if (typeof CSS !== "undefined" && CSS.supports("height", "100dvh")) {
+        canvas.style.width = "100dvw";
+        canvas.style.height = "100dvh";
     }
-}
-
-function playSfx(id, volume = 0.3) {
-    const audio = getAudio(id);
-    if (!audio) return;
-    if (isMuted) return;
-    audio.volume = volume;
-    audio.currentTime = 0;
-    playTrack(audio, () => playSfx(id, volume));
-}
-
-function pauseOtherTracks(activeId) {
-    const tracks = ["bg-music", "game-music"];
-    tracks.forEach((trackId) => {
-        if (trackId === activeId) return;
-        const track = getAudio(trackId);
-        if (!track) return;
-        track.pause();
-        track.currentTime = 0;
-    });
-}
-
-function setBackgroundMusicLevel(volume) {
-    const bgMusic = getAudio("bg-music");
-    if (!bgMusic) return;
-    bgMusic.volume = volume;
-}
-
-function stopAllSounds() {
-    const tracks = document.querySelectorAll("audio");
-    tracks.forEach((track) => {
-        track.pause();
-        track.currentTime = 0;
-    });
-}
-
-function toggleMute() {
-    isMuted = !isMuted;
-    setAllAudioMuted(isMuted);
-    if (isMuted) {
-        stopAllSounds();
-    }
-    updateMuteButtons();
-}
-
-function setAllAudioMuted(muted) {
-    const tracks = document.querySelectorAll("audio");
-    tracks.forEach((track) => {
-        track.muted = muted;
-    });
-}
-
-function setupMuteButtons() {
-    const buttons = document.querySelectorAll(".mute-toggle");
-    if (!buttons.length) return;
-    buttons.forEach((button) => {
-        button.addEventListener("click", toggleMute);
-    });
-    updateMuteButtons();
-}
-
-function updateMuteButtons() {
-    const buttons = document.querySelectorAll(".mute-toggle");
-    buttons.forEach((button) => {
-        button.textContent = isMuted ? "Sound: Aus" : "Sound: An";
-    });
-}
-
-function runOnFirstInteraction(fn) {
-    if (musicListenerAttached) return;
-    const handler = () => handleFirstInteraction(fn, handler);
-    addMusicStartListeners(handler);
-    musicListenerAttached = true;
-}
-
-function handleFirstInteraction(fn, handler) {
-    fn();
-    removeMusicStartListeners(handler);
-    musicListenerAttached = false;
-}
-
-function addMusicStartListeners(handler) {
-    document.addEventListener("click", handler);
-    document.addEventListener("keydown", handler);
-    document.addEventListener("touchstart", handler);
-}
-
-function removeMusicStartListeners(handler) {
-    document.removeEventListener("click", handler);
-    document.removeEventListener("keydown", handler);
-    document.removeEventListener("touchstart", handler);
 }

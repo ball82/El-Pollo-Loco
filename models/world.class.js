@@ -17,6 +17,7 @@ class World {
     isStopped = false;
     isGameOver = false;
     mainInterval;
+    animationFrameId;
     lastThrow = 0;
 
     healthImages = [
@@ -71,6 +72,9 @@ class World {
     } 
 
     run(){
+        if (this.mainInterval) {
+            clearInterval(this.mainInterval);
+        }
         this.mainInterval = setInterval(() => {
             if (this.isStopped) return;
             this.checkCollisions();
@@ -85,6 +89,7 @@ class World {
         if (!this.keyboard.D) return;
         if (!this.canThrowBottle()) return;
         let bottle = new ThowableObject(this.character.x + 100, this.character.y + 100);
+        bottle.world = this;
         this.throwableObjects.push(bottle);
         this.consumeBottle();
         if (typeof playSfx === "function") {
@@ -106,16 +111,18 @@ class World {
     checkCollisions() {
         if (this.character.isDead()) return;
         for (let i = this.enemies.length - 1; i >= 0; i--) {
-            let enemy = this.enemies[i];
-            if (enemy.isDead) continue;
-            if (!this.isCharacterEnemyColliding(enemy)) continue;
-
-            if (this.isStompingEnemy(enemy)) {
-                this.handleStomp(enemy, i);
-            } else {
-                this.handleCharacterHit();
-            }
+            this.processEnemyCollision(this.enemies[i], i);
         }
+    }
+
+    processEnemyCollision(enemy, index) {
+        if (enemy.isDead) return;
+        if (!this.isCharacterEnemyColliding(enemy)) return;
+        if (this.isStompingEnemy(enemy)) {
+            this.handleStomp(enemy, index);
+            return;
+        }
+        this.handleCharacterHit();
     }
 
     isStompingEnemy(enemy) {
@@ -192,22 +199,30 @@ class World {
     }
 
     checkCollectables(){
-        this.collectFromArray(this.coins, (index) => {
-            this.character.coins = Math.min(100, this.character.coins + 20);
-            this.coinStatusBar.setPercentage(this.character.coins);
-            this.coins.splice(index, 1);
-            if (typeof playSfx === "function") {
-                playSfx("coin_insert", 0.15);
-            }
-        });
-        this.collectFromArray(this.bottles, (index) => {
-            this.character.bottles = Math.min(100, this.character.bottles + 20);
-            this.bottleStatusBar.setPercentage(this.character.bottles);
-            this.bottles.splice(index, 1);
-            if (typeof playSfx === "function") {
-                playSfx("retract_bottles", 0.15);
-            }
-        });
+        this.collectCoins();
+        this.collectBottles();
+    }
+
+    collectCoins() {
+        this.collectFromArray(this.coins, (index) => this.onCoinCollected(index));
+    }
+
+    onCoinCollected(index) {
+        this.character.coins = Math.min(100, this.character.coins + 20);
+        this.coinStatusBar.setPercentage(this.character.coins);
+        this.coins.splice(index, 1);
+        if (typeof playSfx === "function") playSfx("coin_insert", 0.15);
+    }
+
+    collectBottles() {
+        this.collectFromArray(this.bottles, (index) => this.onBottleCollected(index));
+    }
+
+    onBottleCollected(index) {
+        this.character.bottles = Math.min(100, this.character.bottles + 20);
+        this.bottleStatusBar.setPercentage(this.character.bottles);
+        this.bottles.splice(index, 1);
+        if (typeof playSfx === "function") playSfx("retract_bottles", 0.15);
     }
 
     collectFromArray(items, onCollect){
@@ -220,65 +235,107 @@ class World {
 
     checkThrowableHits(){
         for (let i = this.throwableObjects.length - 1; i >= 0; i--) {
-            const bottle = this.throwableObjects[i];
-            if (bottle.isMarkedForRemoval) {
-                this.throwableObjects.splice(i, 1);
-                continue;
-            }
-            if (bottle.hasHit) continue;
-            for (let j = this.enemies.length - 1; j >= 0; j--) {
-                const enemy = this.enemies[j];
-                if (bottle.isColliding(enemy)) {
-                    this.handleThrowableHit(enemy, j, bottle);
-                    if (!(enemy instanceof Endboss)) {
-                        this.throwableObjects.splice(i, 1);
-                    }
-                    break;
-                }
-            }
+            this.processThrowableObject(i);
         }
     }
 
-    handleThrowableHit(enemy, enemyIndex, bottle){
-        if (enemy instanceof Endboss) {
-            enemy.hit();
-            if (bottle) {
-                const bossCenter = enemy.x + enemy.width / 2;
-                const bottleCenter = bottle.x + bottle.width / 2;
-                const offset = bottleCenter < bossCenter ? 20 : -20;
-                bottle.x += offset;
-                bottle.splash();
-            }
-            if (typeof playSfx === "function") {
-                playSfx("bottle-hit", 0.45);
-            }
-            if (enemy.isDead) {
-                // keep boss for dead animation; removal handled in checkGameEnd
-            }
-        } else {
-            this.enemies.splice(enemyIndex, 1);
+    processThrowableObject(index) {
+        const bottle = this.throwableObjects[index];
+        this.handleMissedBottle(bottle);
+        if (this.removeMarkedBottle(index, bottle)) return;
+        if (bottle.hasHit) return;
+        this.checkBottleEnemyCollisions(index, bottle);
+    }
+
+    removeMarkedBottle(index, bottle) {
+        if (!bottle.isMarkedForRemoval) return false;
+        this.removeThrowableObject(index);
+        return true;
+    }
+
+    checkBottleEnemyCollisions(bottleIndex, bottle) {
+        for (let enemyIndex = this.enemies.length - 1; enemyIndex >= 0; enemyIndex--) {
+            const enemy = this.enemies[enemyIndex];
+            if (!bottle.isColliding(enemy)) continue;
+            this.handleThrowableHit(enemy, enemyIndex, bottle);
+            if (!(enemy instanceof Endboss)) this.removeThrowableObject(bottleIndex);
+            break;
         }
+    }
+
+    handleMissedBottle(bottle) {
+        if (bottle.hasHit) return;
+        if (bottle.y >= 360) {
+            bottle.splash();
+            return;
+        }
+        const outOfLevelRight = bottle.x > this.level.level_end_x + 500;
+        const outOfScreenBottom = bottle.y > this.canves.height + 300;
+        if (outOfLevelRight || outOfScreenBottom) {
+            bottle.markForRemoval();
+        }
+    }
+
+    removeThrowableObject(index) {
+        const bottle = this.throwableObjects[index];
+        if (bottle && typeof bottle.stop === "function") {
+            bottle.stop();
+        }
+        this.throwableObjects.splice(index, 1);
+    }
+
+    handleThrowableHit(enemy, enemyIndex, bottle){
+        if (enemy instanceof Endboss) return this.handleEndbossHit(enemy, bottle);
+        this.enemies.splice(enemyIndex, 1);
+    }
+
+    handleEndbossHit(enemy, bottle) {
+        enemy.hit();
+        if (bottle) this.splashBottleOnBoss(enemy, bottle);
+        if (typeof playSfx === "function") playSfx("bottle-hit", 0.45);
+    }
+
+    splashBottleOnBoss(enemy, bottle) {
+        const bossCenter = enemy.x + enemy.width / 2;
+        const bottleCenter = bottle.x + bottle.width / 2;
+        bottle.x += bottleCenter < bossCenter ? 20 : -20;
+        bottle.splash();
     }
 
     checkGameEnd() {
         if (this.isGameOver) return;
-        if (this.character.isDead()) {
-            this.endGame(false);
-            return;
-        }
-        if (this.isEndbossDefeated()) {
-            const endboss = this.enemies.find(enemy => enemy instanceof Endboss);
-            const deadStartedAt = endboss?.deadStartedAt || 0;
-            const deadDuration = endboss?.getDeadAnimationDuration?.() || 0;
-            if (deadStartedAt && Date.now() - deadStartedAt < deadDuration) {
-                return;
-            }
-            if (endboss) {
-                const index = this.enemies.indexOf(endboss);
-                if (index !== -1) this.enemies.splice(index, 1);
-            }
-            this.endGame(true);
-        }
+        if (this.handleLossCondition()) return;
+        this.handleWinCondition();
+    }
+
+    handleLossCondition() {
+        if (!this.character.isDead()) return false;
+        this.endGame(false);
+        return true;
+    }
+
+    handleWinCondition() {
+        if (!this.isEndbossDefeated()) return;
+        const endboss = this.getEndboss();
+        if (this.isEndbossDeathAnimationRunning(endboss)) return;
+        this.removeEndboss(endboss);
+        this.endGame(true);
+    }
+
+    getEndboss() {
+        return this.enemies.find((enemy) => enemy instanceof Endboss);
+    }
+
+    isEndbossDeathAnimationRunning(endboss) {
+        const deadStartedAt = endboss?.deadStartedAt || 0;
+        const deadDuration = endboss?.getDeadAnimationDuration?.() || 0;
+        return deadStartedAt && Date.now() - deadStartedAt < deadDuration;
+    }
+
+    removeEndboss(endboss) {
+        if (!endboss) return;
+        const index = this.enemies.indexOf(endboss);
+        if (index !== -1) this.enemies.splice(index, 1);
     }
 
     isEndbossDefeated() {
@@ -288,86 +345,47 @@ class World {
 
     endGame(isWin) {
         this.isGameOver = true;
-        this.isStopped = true;
-        if (typeof stopAllSounds === "function") {
-            stopAllSounds();
-        }
-        if (isWin && typeof playSfx === "function") {
-            playSfx("win", 0.45);
-        }
-        if (!isWin && typeof playSfx === "function") {
-            playSfx("game-over", 0.45);
-        }
-        if (typeof showEndScreen === "function") {
-            showEndScreen(isWin);
-        }
+        this.stop();
+        this.stopGameAudio();
+        this.playEndSound(isWin);
+        if (typeof showEndScreen === "function") showEndScreen(isWin);
+    }
+
+    stopGameAudio() {
+        if (typeof stopAllSounds === "function") stopAllSounds();
+    }
+
+    playEndSound(isWin) {
+        if (typeof playSfx !== "function") return;
+        playSfx(isWin ? "win" : "game-over", 0.45);
     }
 
     stop() {
         this.isStopped = true;
+        this.stopMainInterval();
+        this.stopAnimationFrame();
+        this.stopThrowableObjects();
+    }
+
+    stopMainInterval() {
+        if (!this.mainInterval) return;
+        clearInterval(this.mainInterval);
+        this.mainInterval = null;
+    }
+
+    stopAnimationFrame() {
+        if (!this.animationFrameId) return;
+        cancelAnimationFrame(this.animationFrameId);
+        this.animationFrameId = null;
+    }
+
+    stopThrowableObjects() {
+        this.throwableObjects.forEach((bottle) => {
+            if (typeof bottle.stop === "function") bottle.stop();
+        });
     }
 
     draw() {
-        this.ctx.clearRect(0, 0, this.canves.width, this.canves.height); // clear canvas
-
-        this.ctx.translate(this.camera_x, 0) ;
-
-        this.ctx.drawImage(this.character.img, this.character.x, this.character.y, this.character.width, this.character.height);
-        this.addObject(this.backgroundObjects); 
-
-        this.addToMap(this.character);
-        this.addObject(this.enemies);
-        this.addObject(this.clouds);
-        this.addObject(this.coins);
-        this.addObject(this.bottles);
-        this.addObject(this.throwableObjects);
-        this.ctx.translate(-this.camera_x, 0);  
-        
-        this.addToMap(this.statusBar);
-        this.addToMap(this.coinStatusBar);
-        this.addToMap(this.bottleStatusBar);
-
-        let self = this;
-        requestAnimationFrame(function() {
-            self.draw();
-        });
+        drawWorldFrame(this);
     }
-
-    addObject = function(objects){
-        objects.forEach(o => {
-            this.addToMap(o);
-        });
-    }
-
-    addToMap (mo){
-        
-        if(mo.otherDirection){
-            this.flipImage(mo);
-        }
-
-        mo.draw(this.ctx);
-        if (this.showHitboxes) {
-            mo.drawFrame(this.ctx);
-        }
-
-        if(mo.otherDirection){
-            this.flipImageBack(mo);
-
-        }   
-    }
-
-    flipImage(mo) {
-        this.ctx.save();
-        this.ctx.translate(mo.width, 0);
-        this.ctx.scale(-1, 1);
-        mo.x = mo.x * -1;
-    }
-
-    flipImageBack(mo) {
-        mo.x = mo.x * -1;
-        this.ctx.restore(); 
-    }
-
-
-
 }

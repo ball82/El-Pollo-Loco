@@ -1,17 +1,25 @@
+function placeEnemy(enemy, x) {
+    enemy.x = x;
+    return enemy;
+}
+
 function createLevel1(){
     const endboss = new Endboss();
     endboss.x = 720 * 3 + 450;
 
     return new Level(
         [
-            new Chicken(), 
-            new Chicken(), 
-            new Chicken(),
-            new SmallChicken(),
-            new SmallChicken(720, 0),
-            new Chicken(720, 0),
-            new SmallChicken(),
-            new Chicken(),
+            placeEnemy(new SmallChicken(), 760),
+            placeEnemy(new Chicken(), 900),
+            placeEnemy(new SmallChicken(), 1040),
+            placeEnemy(new Chicken(), 1180),
+            placeEnemy(new SmallChicken(), 1320),
+            placeEnemy(new Chicken(), 1460),
+            placeEnemy(new SmallChicken(), 1600),
+            placeEnemy(new Chicken(), 1740),
+            placeEnemy(new SmallChicken(), 1880),
+            placeEnemy(new Chicken(), 2020),
+            placeEnemy(new SmallChicken(), 2160),
             endboss,
         ],
         [

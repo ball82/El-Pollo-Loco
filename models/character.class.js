@@ -89,48 +89,95 @@ class Character extends MovableObject{
     
 
     animate(){
+        this.startMovementLoop();
+        this.startAnimationLoop();
+    }
 
-        setInterval(() => {
-            if (this.world && this.world.isStopped) return;
-            if (this.isDead()) return;
-            if(this.world.keyboard.right && this.x < this.world.level.level_end_x ){
-                this.moveRight();
-                this.otherDirection = false;
-                this.registerAction();
-            }
-            if(this.world.keyboard.left && this.x > 0 ){
-                this.moveLeft();
-                this.otherDirection = true;
-                this.registerAction();
-             }
-            if(this.world.keyboard.space){
-                this.jump(); 
-                this.registerAction();
-            }
+    startMovementLoop(){
+        setInterval(() => this.updateMovement(), 1000 / 60);
+    }
 
-            this.world.camera_x = -this.x + 80;
-        }, 1000/60);
+    updateMovement(){
+        if (this.shouldPauseMovement()) return;
+        this.handleHorizontalMovement();
+        this.handleJumpInput();
+        this.world.camera_x = -this.x + 80;
+    }
 
-        setInterval(() => {
-            if (this.world && this.world.isStopped) return;
+    shouldPauseMovement(){
+        return (this.world && this.world.isStopped) || this.isDead();
+    }
 
-            if (this.isDead()) {
-                this.playAnimation(this.images_Dead);
-            } else if(this.isHurt()){
-                this.playAnimation(this.images_Hurt);
-                this.registerAction();
-            } else if(this.isAboveGround()){
-                this.playAnimation(this.images_Jupping);
-            } else{
-                if(this.world.keyboard.right || this.world.keyboard.left){
-                    this.playAnimation(this.images_Walking);
-                } else if (this.isSleeping()) {
-                    this.playAnimation(this.images_Sleep);
-                } else {
-                    this.playAnimation(this.images_Idle);
-                    }
-                }
-        }, 35);
+    handleHorizontalMovement(){
+        if (this.canMoveRight()) this.moveRightWithDirection(false);
+        if (this.canMoveLeft()) this.moveRightWithDirection(true);
+    }
+
+    canMoveRight(){
+        return this.world.keyboard.right && this.x < this.world.level.level_end_x;
+    }
+
+    canMoveLeft(){
+        return this.world.keyboard.left && this.x > 0;
+    }
+
+    moveRightWithDirection(otherDirection){
+        if (otherDirection) {
+            this.moveLeft();
+        } else {
+            this.moveRight();
+        }
+        this.otherDirection = otherDirection;
+        this.registerAction();
+    }
+
+    handleJumpInput(){
+        if (!this.world.keyboard.space) return;
+        this.jump();
+        this.registerAction();
+    }
+
+    startAnimationLoop(){
+        setInterval(() => this.updateAnimationState(), 35);
+    }
+
+    updateAnimationState(){
+        if (this.world && this.world.isStopped) return;
+        if (this.playDeathAnimation()) return;
+        if (this.playHurtAnimation()) return;
+        if (this.playJumpAnimation()) return;
+        this.playGroundAnimation();
+    }
+
+    playDeathAnimation(){
+        if (!this.isDead()) return false;
+        this.playAnimation(this.images_Dead);
+        return true;
+    }
+
+    playHurtAnimation(){
+        if (!this.isHurt()) return false;
+        this.playAnimation(this.images_Hurt);
+        this.registerAction();
+        return true;
+    }
+
+    playJumpAnimation(){
+        if (!this.isAboveGround()) return false;
+        this.playAnimation(this.images_Jupping);
+        return true;
+    }
+
+    playGroundAnimation(){
+        if (this.isWalking()) {
+            this.playAnimation(this.images_Walking);
+            return;
+        }
+        this.playAnimation(this.isSleeping() ? this.images_Sleep : this.images_Idle);
+    }
+
+    isWalking(){
+        return this.world.keyboard.right || this.world.keyboard.left;
     }
 
     jump() {
@@ -141,7 +188,7 @@ class Character extends MovableObject{
                 playSfx("pepe-jump", 0.35);
             }
         }
-        } 
+    } 
 
     registerAction(){
         this.lastAction = new Date().getTime();

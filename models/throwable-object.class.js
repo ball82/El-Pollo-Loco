@@ -33,12 +33,15 @@ class ThowableObject extends MovableObject {
         this.speedY = 12;
         this.applyGravity();
         this.throwInterval = setInterval(() => {
+            if (this.world && this.world.isStopped) return;
+            if (this.isMarkedForRemoval) return;
             this.x += 6.5;
         }, 16);
     }
 
     animateRotation(){
-        setInterval(() => {
+        this.rotationInterval = setInterval(() => {
+            if (this.world && this.world.isStopped) return;
             if (this.isSplashing) return;
             this.playAnimation(this.images_Rotation);
         }, 80);
@@ -48,22 +51,52 @@ class ThowableObject extends MovableObject {
         if (this.isSplashing) return;
         this.isSplashing = true;
         this.hasHit = true;
-        if (this.throwInterval) {
-            clearInterval(this.throwInterval);
-            this.throwInterval = null;
-        }
+        this.stopThrowMovement();
         this.speedY = 0;
+        this.startSplashAnimation();
+    }
+
+    stopThrowMovement() {
+        if (!this.throwInterval) return;
+        clearInterval(this.throwInterval);
+        this.throwInterval = null;
+    }
+
+    startSplashAnimation() {
         let frame = 0;
-        const splashInterval = setInterval(() => {
+        this.splashInterval = setInterval(() => {
+            if (this.world && this.world.isStopped) return;
             if (frame >= this.images_Splash.length) {
-                clearInterval(splashInterval);
-                this.isMarkedForRemoval = true;
+                this.markForRemoval();
                 return;
             }
             this.path = this.images_Splash[frame];
             this.img = this.imageCache[this.path];
             frame += 1;
         }, 55);
+    }
+
+    markForRemoval() {
+        this.isMarkedForRemoval = true;
+        if (this.splashInterval) {
+            clearInterval(this.splashInterval);
+            this.splashInterval = null;
+        }
+    }
+
+    stop() {
+        this.markForRemoval();
+        this.stopThrowMovement();
+        this.stopRotationAnimation();
+        if (typeof this.stopGravity === "function") {
+            this.stopGravity();
+        }
+    }
+
+    stopRotationAnimation() {
+        if (!this.rotationInterval) return;
+        clearInterval(this.rotationInterval);
+        this.rotationInterval = null;
     }
  
 }
