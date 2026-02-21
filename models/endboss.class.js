@@ -5,7 +5,7 @@ class Endboss extends MovableObject {
     y = 100;
     isDead = false;
     hitsTaken = 0;
-    maxHits = 3;
+    maxHits = 5;
     deadStartedAt = 0;
     deadFrameTime = 180;
 

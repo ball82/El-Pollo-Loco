@@ -174,7 +174,7 @@ class World {
 
     handleStomp(enemy, index) {
         if (enemy instanceof Endboss) {
-            enemy.die();
+            enemy.hit();
         } else if (enemy instanceof Chicken || enemy instanceof SmallChicken) {
             this.killChicken(enemy);
         } else {
@@ -222,8 +222,12 @@ class World {
     }
 
     onBottleCollected(index) {
+        const collectedBottle = this.bottles[index];
         this.character.bottles = Math.min(100, this.character.bottles + 20);
         this.bottleStatusBar.setPercentage(this.character.bottles);
+        if (collectedBottle && typeof collectedBottle.stop === "function") {
+            collectedBottle.stop();
+        }
         this.bottles.splice(index, 1);
         if (typeof playSfx === "function") playSfx("retract_bottles", 0.15);
     }
@@ -406,6 +410,9 @@ class World {
 
     stopThrowableObjects() {
         this.throwableObjects.forEach((bottle) => {
+            if (typeof bottle.stop === "function") bottle.stop();
+        });
+        this.bottles.forEach((bottle) => {
             if (typeof bottle.stop === "function") bottle.stop();
         });
     }

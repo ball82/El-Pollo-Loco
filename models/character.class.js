@@ -201,7 +201,7 @@ class Character extends MovableObject{
     jump() {
         if (this.isDead()) return;
         if (!this.isAboveGround()) {
-            this.speedY = 15;
+            this.speedY = 12;
             if (typeof playSfx === "function") {
                 playSfx("pepe-jump", 0.35);
             }
