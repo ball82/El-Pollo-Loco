@@ -4,6 +4,7 @@ class WorldRenderer {
         this.clearCanvas(world);
         this.drawScrollableWorld(world);
         this.drawHud(world);
+        this.drawCharacterForeground(world);
         world.animationFrameId = requestAnimationFrame(() => world.draw());
     }
 
@@ -14,7 +15,6 @@ class WorldRenderer {
     static drawScrollableWorld(world) {
         world.ctx.translate(world.camera_x, 0);
         this.drawObjects(world, world.backgroundObjects);
-        this.drawObject(world, world.character);
         this.drawObjects(world, world.enemies);
         this.drawObjects(world, world.clouds);
         this.drawObjects(world, world.coins);
@@ -27,6 +27,12 @@ class WorldRenderer {
         this.drawObject(world, world.statusBar);
         this.drawObject(world, world.coinStatusBar);
         this.drawObject(world, world.bottleStatusBar);
+    }
+
+    static drawCharacterForeground(world) {
+        world.ctx.translate(world.camera_x, 0);
+        this.drawObject(world, world.character);
+        world.ctx.translate(-world.camera_x, 0);
     }
 
     static drawObjects(world, objects) {
