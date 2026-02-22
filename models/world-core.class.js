@@ -49,6 +49,12 @@ class WorldCore {
         'img_pollo_locco/img/7_statusbars/1_statusbar/3_statusbar_bottle/orange/100.png'
     ];
 
+    /**
+     * Creates an instance of WorldCore.
+     *
+     * @param {HTMLCanvasElement} canvas - Canvas element used for rendering.
+     * @param {Keyboard} keyboard - Keyboard input state object.
+     */
     constructor(canvas, keyboard) {
         this.ctx = canvas.getContext('2d');
         this.canves = canvas;
@@ -65,6 +71,10 @@ class WorldCore {
         this.run();
     }
 
+    /**
+     * Assigns world references to all active entities.
+     * @returns {void} - No return value.
+     */
     setWorld() {
         this.character.world = this;
         this.enemies.forEach((enemy) => enemy.world = this);
@@ -73,6 +83,10 @@ class WorldCore {
         this.bottles.forEach((bottle) => bottle.world = this);
     }
 
+    /**
+     * Runs the loop.
+     * @returns {void} - No return value.
+     */
     run() {
         if (this.mainInterval) {
             clearInterval(this.mainInterval);
@@ -88,6 +102,10 @@ class WorldCore {
         }, 1000 / 60);
     }
 
+    /**
+     * Draws the object.
+     * @returns {void} - No return value.
+     */
     draw() {
         WorldRenderer.drawFrame(this);
     }

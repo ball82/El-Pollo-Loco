@@ -1,4 +1,8 @@
 class ModalTemplates {
+    /**
+     * Returns how to data.
+     * @returns {{title: string, html: string}} - The resulting value.
+     */
     static getHowToData() {
         return {
             title: 'So funktioniert das Spiel',
@@ -6,6 +10,10 @@ class ModalTemplates {
         };
     }
 
+    /**
+     * Returns controls data.
+     * @returns {{title: string, html: string}} - The resulting value.
+     */
     static getControlsData() {
         return {
             title: 'Tastenbelegung',
@@ -13,6 +21,10 @@ class ModalTemplates {
         };
     }
 
+    /**
+     * Returns story data.
+     * @returns {{title: string, html: string}} - The resulting value.
+     */
     static getStoryData() {
         return {
             title: 'Story',
@@ -20,6 +32,12 @@ class ModalTemplates {
         };
     }
 
+    /**
+     * Returns by type.
+     *
+     * @param {string} type - Type key that controls behavior/content.
+     * @returns {{title: string, html: string}} - The resulting value.
+     */
     static getByType(type) {
         if (type === 'controls') return this.getControlsData();
         if (type === 'story') return this.getStoryData();

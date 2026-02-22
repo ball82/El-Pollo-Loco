@@ -77,6 +77,9 @@ class Character extends MovableObject{
     world;
     lastAction = new Date().getTime();
 
+    /**
+     * Creates an instance of Character.
+     */
     constructor(){
         super().loadImage('img_pollo_locco/img/2_character_pepe/1_idle/idle/I-1.png');
         this.loadImages(this.images_Walking);
@@ -90,15 +93,27 @@ class Character extends MovableObject{
     }
     
 
+    /**
+     * Starts character movement and animation loops.
+     * @returns {void} - No return value.
+     */
     animate(){
         this.startMovementLoop();
         this.startAnimationLoop();
     }
 
+    /**
+     * Starts movement loop.
+     * @returns {void} - No return value.
+     */
     startMovementLoop(){
         setInterval(() => this.updateMovement(), 1000 / 60);
     }
 
+    /**
+     * Updates movement.
+     * @returns {void} - No return value.
+     */
     updateMovement(){
         if (this.shouldPauseMovement()) return;
         this.handleHorizontalMovement();
@@ -106,41 +121,75 @@ class Character extends MovableObject{
         this.world.camera_x = this.getClampedCameraX();
     }
 
+    /**
+     * Returns clamped camera x.
+     * @returns {number} - Camera x-position clamped to level boundaries.
+     */
     getClampedCameraX() {
         const desiredCameraX = -this.x + 80;
         const minCameraX = this.getMinCameraX();
         return Math.min(0, Math.max(minCameraX, desiredCameraX));
     }
 
+    /**
+     * Returns min camera x.
+     * @returns {number} - Left-most camera x-position allowed by the background width.
+     */
     getMinCameraX() {
         const rightEdge = this.getBackgroundRightEdge();
         const canvasWidth = this.world?.canves?.width || 720;
         return Math.min(0, -(rightEdge - canvasWidth));
     }
 
+    /**
+     * Returns background right edge.
+     * @returns {number} - Rightmost x-position of all background objects.
+     */
     getBackgroundRightEdge() {
         const backgrounds = this.world?.backgroundObjects || [];
         if (!backgrounds.length) return 720;
         return Math.max(...backgrounds.map((object) => object.x + object.width));
     }
 
+    /**
+     * Determines whether pause movement should run.
+     * @returns {boolean} - True if the condition is met; otherwise false.
+     */
     shouldPauseMovement(){
         return (this.world && this.world.isStopped) || this.isDead();
     }
 
+    /**
+     * Processes horizontal input and movement direction.
+     * @returns {void} - No return value.
+     */
     handleHorizontalMovement(){
         if (this.canMoveRight()) this.moveRightWithDirection(false);
         if (this.canMoveLeft()) this.moveRightWithDirection(true);
     }
 
+    /**
+     * Checks whether move right is possible.
+     * @returns {boolean} - True if the condition is met; otherwise false.
+     */
     canMoveRight(){
         return this.world.keyboard.right && this.x < this.world.level.level_end_x;
     }
 
+    /**
+     * Checks whether move left is possible.
+     * @returns {boolean} - True if the condition is met; otherwise false.
+     */
     canMoveLeft(){
         return this.world.keyboard.left && this.x > 0;
     }
 
+    /**
+     * Moves right with direction.
+     *
+     * @param {boolean} otherDirection - Whether the character should move left (`true`) or right (`false`).
+     * @returns {void} - No return value.
+     */
     moveRightWithDirection(otherDirection){
         if (otherDirection) {
             this.moveLeft();
@@ -151,16 +200,28 @@ class Character extends MovableObject{
         this.registerAction();
     }
 
+    /**
+     * Triggers jump when jump input is active.
+     * @returns {void} - No return value.
+     */
     handleJumpInput(){
         if (!this.world.keyboard.space) return;
         this.jump();
         this.registerAction();
     }
 
+    /**
+     * Starts animation loop.
+     * @returns {void} - No return value.
+     */
     startAnimationLoop(){
         setInterval(() => this.updateAnimationState(), 35);
     }
 
+    /**
+     * Updates animation state.
+     * @returns {void} - No return value.
+     */
     updateAnimationState(){
         if (this.world && this.world.isStopped) return;
         if (this.playDeathAnimation()) return;
@@ -169,12 +230,20 @@ class Character extends MovableObject{
         this.playGroundAnimation();
     }
 
+    /**
+     * Plays death animation.
+     * @returns {boolean} - True if the condition is met; otherwise false.
+     */
     playDeathAnimation(){
         if (!this.isDead()) return false;
         this.playAnimation(this.images_Dead);
         return true;
     }
 
+    /**
+     * Plays hurt animation.
+     * @returns {boolean} - True if the condition is met; otherwise false.
+     */
     playHurtAnimation(){
         if (!this.isHurt()) return false;
         this.playAnimation(this.images_Hurt);
@@ -182,6 +251,10 @@ class Character extends MovableObject{
         return true;
     }
 
+    /**
+     * Plays jump animation.
+     * @returns {boolean} - True if the condition is met; otherwise false.
+     */
     playJumpAnimation(){
         if (!this.isAboveGround()) return false;
         const now = Date.now();
@@ -191,6 +264,10 @@ class Character extends MovableObject{
         return true;
     }
 
+    /**
+     * Plays ground animation.
+     * @returns {void} - No return value.
+     */
     playGroundAnimation(){
         if (this.isWalking()) {
             this.playAnimation(this.images_Walking);
@@ -199,10 +276,18 @@ class Character extends MovableObject{
         this.playAnimation(this.isSleeping() ? this.images_Sleep : this.images_Idle);
     }
 
+    /**
+     * Checks whether walking is true.
+     * @returns {boolean} - True if the condition is met; otherwise false.
+     */
     isWalking(){
         return this.world.keyboard.right || this.world.keyboard.left;
     }
 
+    /**
+     * Applies jump impulse if the character is grounded.
+     * @returns {void} - No return value.
+     */
     jump() {
         if (this.isDead()) return;
         if (!this.isAboveGround()) {
@@ -211,15 +296,27 @@ class Character extends MovableObject{
         }
     } 
 
+    /**
+     * Stores the timestamp of the last player action.
+     * @returns {void} - No return value.
+     */
     registerAction(){
         this.lastAction = new Date().getTime();
     }
 
+    /**
+     * Checks whether sleeping is true.
+     * @returns {boolean} - True if the condition is met; otherwise false.
+     */
     isSleeping(){
         let timepassed = new Date().getTime() - this.lastAction;
         return timepassed > 10000;
     }
 
+    /**
+     * Reduces character energy when taking damage.
+     * @returns {void} - No return value.
+     */
     hit() {
         this.energy -= this.hitDamage;
         if (this.energy < 0) {

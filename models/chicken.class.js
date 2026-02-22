@@ -12,6 +12,9 @@ class Chicken extends BaseChicken{
     speedMin = 0.32;
     speedRange = 0.35;
 
+    /**
+     * Creates an instance of Chicken.
+     */
     constructor(){
         super();
         this.initChicken();

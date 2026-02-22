@@ -41,6 +41,9 @@ class Endboss extends MovableObject {
         'img_pollo_locco/img/4_enemie_boss_chicken/5_dead/G26.png'
     ];
 
+    /**
+     * Creates an instance of Endboss.
+     */
     constructor(){
         super().loadImage(this.images_Walking[0]);
         this.loadImages(this.images_Walking);
@@ -50,6 +53,10 @@ class Endboss extends MovableObject {
         this.animate();    
     }
 
+    /**
+     * Runs walk animation and dash trigger logic.
+     * @returns {void} - No return value.
+     */
     animate(){
         setInterval(() => {
             if (this.world && this.world.isStopped) return;
@@ -60,6 +67,10 @@ class Endboss extends MovableObject {
         }, this.walkFrameTime);
     }
 
+    /**
+     * Counts completed walk cycles and triggers a dash sequence.
+     * @returns {void} - No return value.
+     */
     handleWalkCycle() {
         if (!this.images_Walking.length) return;
         if (this.CurrentImage % this.images_Walking.length !== 0) return;
@@ -69,6 +80,10 @@ class Endboss extends MovableObject {
         this.startDashSequence();
     }
 
+    /**
+     * Starts dash sequence.
+     * @returns {void} - No return value.
+     */
     startDashSequence() {
         if (this.isDashing || this.isDead) return;
         this.isDashing = true;
@@ -82,6 +97,13 @@ class Endboss extends MovableObject {
         });
     }
 
+    /**
+     * Moves to x.
+     *
+     * @param {number} targetX - Target x-coordinate in pixels.
+     * @param {Function} onComplete - Callback fired when movement is finished.
+     * @returns {void} - No return value.
+     */
     moveToX(targetX, onComplete) {
         this.stopDashMovement();
         this.dashInterval = setInterval(
@@ -90,6 +112,13 @@ class Endboss extends MovableObject {
         );
     }
 
+    /**
+     * Updates dash position.
+     *
+     * @param {number} targetX - Target x-coordinate in pixels.
+     * @param {Function} onComplete - Callback fired when movement is finished.
+     * @returns {void} - No return value.
+     */
     updateDashPosition(targetX, onComplete) {
         if (this.shouldSkipDashUpdate()) return;
         const direction = this.getDashDirection(targetX);
@@ -101,6 +130,10 @@ class Endboss extends MovableObject {
         this.x = nextX;
     }
 
+    /**
+     * Determines whether skip dash update should run.
+     * @returns {boolean} - True if the condition is met; otherwise false.
+     */
     shouldSkipDashUpdate() {
         if (this.isDead) {
             this.stopDashMovement();
@@ -109,29 +142,64 @@ class Endboss extends MovableObject {
         return this.world && this.world.isStopped;
     }
 
+    /**
+     * Returns dash direction.
+     *
+     * @param {number} targetX - Target x-coordinate in pixels.
+     * @returns {number} - Movement direction (`-1` for left, `1` for right).
+     */
     getDashDirection(targetX) {
         return targetX > this.x ? 1 : -1;
     }
 
+    /**
+     * Returns next dash x.
+     *
+     * @param {number} direction - Movement direction (`-1` or `1`).
+     * @returns {number} - Next x-position for the current dash step.
+     */
     getNextDashX(direction) {
         return this.x + direction * this.dashStep;
     }
 
+    /**
+     * Checks whether reached dash target exists.
+     *
+     * @param {number} targetX - Target x-coordinate in pixels.
+     * @param {number} nextX - Next x-coordinate candidate.
+     * @param {number} direction - Movement direction (`-1` or `1`).
+     * @returns {boolean} - True if the condition is met; otherwise false.
+     */
     hasReachedDashTarget(targetX, nextX, direction) {
         return direction > 0 ? nextX >= targetX : nextX <= targetX;
     }
 
+    /**
+     * Handles finish dash move.
+     *
+     * @param {number} targetX - Target x-coordinate in pixels.
+     * @param {Function} onComplete - Callback fired when movement is finished.
+     * @returns {void} - No return value.
+     */
     finishDashMove(targetX, onComplete) {
         this.x = targetX;
         this.stopDashMovement();
         if (onComplete) onComplete();
     }
 
+    /**
+     * Resets walk animation.
+     * @returns {void} - No return value.
+     */
     resetWalkAnimation() {
         this.CurrentImage = 0;
         this.setCurrentImage(this.images_Walking[0]);
     }
 
+    /**
+     * Switches the endboss to death state and starts death animation.
+     * @returns {void} - No return value.
+     */
     die() {
         if (this.isDead) return;
         this.stopHurtAnimation();
@@ -142,6 +210,10 @@ class Endboss extends MovableObject {
         this.playDeadAnimation();
     }
 
+    /**
+     * Plays dead animation.
+     * @returns {void} - No return value.
+     */
     playDeadAnimation() {
         let frame = 0;
         const interval = setInterval(() => {
@@ -155,10 +227,18 @@ class Endboss extends MovableObject {
         }, this.deadFrameTime);
     }
 
+    /**
+     * Returns dead animation duration.
+     * @returns {number} - Total dead animation duration in milliseconds.
+     */
     getDeadAnimationDuration() {
         return this.images_Dead.length * this.deadFrameTime;
     }
 
+    /**
+     * Applies damage and triggers hurt or death behavior.
+     * @returns {void} - No return value.
+     */
     hit() {
         if (this.isDead) return;
         this.hitsTaken += 1;
@@ -169,6 +249,10 @@ class Endboss extends MovableObject {
         this.playHurtAnimationOnce();
     }
 
+    /**
+     * Plays hurt animation once.
+     * @returns {void} - No return value.
+     */
     playHurtAnimationOnce() {
         if (!this.images_Hurt.length) return;
         this.stopHurtAnimation();
@@ -177,6 +261,12 @@ class Endboss extends MovableObject {
         this.startHurtAnimationLoop(1);
     }
 
+    /**
+     * Starts hurt animation loop.
+     *
+     * @param {number} startFrame - First frame index to start from.
+     * @returns {void} - No return value.
+     */
     startHurtAnimationLoop(startFrame) {
         let frame = startFrame;
         this.hurtAnimationInterval = setInterval(() => {
@@ -189,15 +279,31 @@ class Endboss extends MovableObject {
         }, this.hurtFrameTime);
     }
 
+    /**
+     * Determines whether stop hurt animation should run.
+     *
+     * @param {number} frame - Current animation frame index.
+     * @returns {boolean} - True if the condition is met; otherwise false.
+     */
     shouldStopHurtAnimation(frame) {
         return this.isDead || frame >= this.images_Hurt.length;
     }
 
+    /**
+     * Sets current image.
+     *
+     * @param {string} path - Image path to load from cache.
+     * @returns {void} - No return value.
+     */
     setCurrentImage(path) {
         this.path = path;
         this.img = this.imageCache[path];
     }
 
+    /**
+     * Stops hurt animation.
+     * @returns {void} - No return value.
+     */
     stopHurtAnimation() {
         if (this.hurtAnimationInterval) {
             clearInterval(this.hurtAnimationInterval);
@@ -206,6 +312,10 @@ class Endboss extends MovableObject {
         this.isPlayingHurtAnimation = false;
     }
 
+    /**
+     * Stops dash movement.
+     * @returns {void} - No return value.
+     */
     stopDashMovement() {
         if (this.dashInterval) {
             clearInterval(this.dashInterval);

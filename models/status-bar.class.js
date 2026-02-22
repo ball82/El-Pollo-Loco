@@ -2,6 +2,13 @@ class StatusBar extends DrawableObject {
     percentage = 100;
     images_StatusBar = [];
 
+    /**
+     * Creates an instance of StatusBar.
+     *
+     * @param {Array<string>} images - Ordered image paths for all status levels.
+     * @param {number} x - Horizontal position in pixels.
+     * @param {number} y - Vertical position in pixels.
+     */
     constructor(images, x, y){
         super();
         this.images_StatusBar = images;
@@ -13,12 +20,22 @@ class StatusBar extends DrawableObject {
         this.setPercentage(100);
     }
 
+    /**
+     * Updates the status value and refreshes the displayed image.
+     *
+     * @param {number} percentage - Percentage value from 0 to 100.
+     * @returns {void} - No return value.
+     */
     setPercentage(percentage){
         this.percentage = Math.max(0, Math.min(100, percentage));
         let path = this.images_StatusBar[this.resolveImageIndex()];
         this.img = this.imageCache[path];
     }
 
+    /**
+     * Calculates the sprite index for the current percentage.
+     * @returns {number} - Selected status sprite index.
+     */
     resolveImageIndex(){
         if (this.percentage === 100) return 5;
         return Math.max(0, Math.ceil(this.percentage / 20) - 1);

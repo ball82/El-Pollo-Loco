@@ -11,6 +11,9 @@ class SmallChicken extends BaseChicken {
     speedMin = 0.4;
     speedRange = 0.45;
 
+    /**
+     * Creates an instance of SmallChicken.
+     */
     constructor() {
         super();
         this.initChicken();

@@ -10,6 +10,10 @@ class BaseChicken extends MovableObject {
     moveInterval = 1000 / 60;
     walkInterval = 110;
 
+    /**
+     * Initializes chicken.
+     * @returns {void} - No return value.
+     */
     initChicken() {
         const firstImage = this.images_Walking[0];
         if (firstImage) {
@@ -21,11 +25,19 @@ class BaseChicken extends MovableObject {
         this.animate();
     }
 
+    /**
+     * Starts movement and walk animation loops.
+     * @returns {void} - No return value.
+     */
     animate() {
         this.startMovement();
         this.startWalkAnimation();
     }
 
+    /**
+     * Starts movement.
+     * @returns {void} - No return value.
+     */
     startMovement() {
         setInterval(() => {
             if (this.shouldPause()) return;
@@ -33,6 +45,10 @@ class BaseChicken extends MovableObject {
         }, this.moveInterval);
     }
 
+    /**
+     * Starts walk animation.
+     * @returns {void} - No return value.
+     */
     startWalkAnimation() {
         setInterval(() => {
             if (this.shouldPause()) return;
@@ -44,10 +60,18 @@ class BaseChicken extends MovableObject {
         }, this.walkInterval);
     }
 
+    /**
+     * Determines whether pause should run.
+     * @returns {boolean} - True if the condition is met; otherwise false.
+     */
     shouldPause() {
         return (this.world && this.world.isStopped) || this.isDead;
     }
 
+    /**
+     * Marks the chicken as dead and switches to the dead sprite.
+     * @returns {void} - No return value.
+     */
     die() {
         if (this.isDead) return;
         this.isDead = true;

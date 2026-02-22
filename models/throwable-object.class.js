@@ -1,5 +1,11 @@
 class ThowableObject extends MovableObject {
 
+    /**
+     * Creates an instance of ThowableObject.
+     *
+     * @param {number} x - Horizontal position in pixels.
+     * @param {number} y - Vertical position in pixels.
+     */
     constructor(x, y){
         super().loadImage('img_pollo_locco/img/6_salsa_bottle/bottle_rotation/1_bottle_rotation.png');
         this.images_Rotation = [
@@ -29,6 +35,10 @@ class ThowableObject extends MovableObject {
         this.animateRotation();
     }
 
+    /**
+     * Starts the throw movement with gravity.
+     * @returns {void} - No return value.
+     */
     trow(){
         this.speedY = 12;
         this.applyGravity();
@@ -39,6 +49,10 @@ class ThowableObject extends MovableObject {
         }, 16);
     }
 
+    /**
+     * Plays bottle rotation frames while flying.
+     * @returns {void} - No return value.
+     */
     animateRotation(){
         this.rotationInterval = setInterval(() => {
             if (this.world && this.world.isStopped) return;
@@ -47,6 +61,10 @@ class ThowableObject extends MovableObject {
         }, 80);
     }
 
+    /**
+     * Starts splash state after impact.
+     * @returns {void} - No return value.
+     */
     splash(){
         if (this.isSplashing) return;
         this.isSplashing = true;
@@ -56,12 +74,20 @@ class ThowableObject extends MovableObject {
         this.startSplashAnimation();
     }
 
+    /**
+     * Stops throw movement.
+     * @returns {void} - No return value.
+     */
     stopThrowMovement() {
         if (!this.throwInterval) return;
         clearInterval(this.throwInterval);
         this.throwInterval = null;
     }
 
+    /**
+     * Starts splash animation.
+     * @returns {void} - No return value.
+     */
     startSplashAnimation() {
         let frame = 0;
         this.splashInterval = setInterval(() => {
@@ -76,6 +102,10 @@ class ThowableObject extends MovableObject {
         }, 55);
     }
 
+    /**
+     * Marks the bottle for cleanup.
+     * @returns {void} - No return value.
+     */
     markForRemoval() {
         this.isMarkedForRemoval = true;
         if (this.splashInterval) {
@@ -84,6 +114,10 @@ class ThowableObject extends MovableObject {
         }
     }
 
+    /**
+     * Stops the process.
+     * @returns {void} - No return value.
+     */
     stop() {
         this.markForRemoval();
         this.stopThrowMovement();
@@ -93,6 +127,10 @@ class ThowableObject extends MovableObject {
         }
     }
 
+    /**
+     * Stops rotation animation.
+     * @returns {void} - No return value.
+     */
     stopRotationAnimation() {
         if (!this.rotationInterval) return;
         clearInterval(this.rotationInterval);

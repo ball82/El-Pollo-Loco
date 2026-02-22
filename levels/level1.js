@@ -1,9 +1,20 @@
 class LevelFactory {
+    /**
+     * Handles place enemy.
+     *
+     * @param {MovableObject} enemy - Enemy instance to process.
+     * @param {number} x - Horizontal position in pixels.
+     * @returns {MovableObject} - The resulting value.
+     */
     static placeEnemy(enemy, x) {
         enemy.x = x;
         return enemy;
     }
 
+    /**
+     * Creates level1.
+     * @returns {Level} - A configured level instance.
+     */
     static createLevel1() {
         const endboss = new Endboss();
         endboss.x = 720 * 3 + 450;

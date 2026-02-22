@@ -9,6 +9,12 @@ class Bottle extends MovableObject {
     ];
     animationInterval = null;
 
+    /**
+     * Creates an instance of Bottle.
+     *
+     * @param {number} x - Horizontal position in pixels.
+     * @param {number} y - Vertical position in pixels.
+     */
     constructor(x, y){
         super().loadImage(this.images_OnGround[0]);
         this.loadImages(this.images_OnGround);
@@ -17,6 +23,10 @@ class Bottle extends MovableObject {
         this.animate();
     }
 
+    /**
+     * Loops the idle bottle animation.
+     * @returns {void} - No return value.
+     */
     animate(){
         this.stop();
         this.animationInterval = setInterval(() => {
@@ -25,6 +35,10 @@ class Bottle extends MovableObject {
         }, 120);
     }
 
+    /**
+     * Stops the process.
+     * @returns {void} - No return value.
+     */
     stop() {
         if (!this.animationInterval) return;
         clearInterval(this.animationInterval);

@@ -4,6 +4,11 @@ class Cloud extends MovableObject {
     height = 150;
     width = 500;
 
+    /**
+     * Creates an instance of Cloud.
+     *
+     * @param {number} x - Horizontal position in pixels.
+     */
     constructor(x = 0){
         super().loadImage('img_pollo_locco/img/5_background/layers/4_clouds/2.png');
         this.x = x;
@@ -12,6 +17,10 @@ class Cloud extends MovableObject {
         this.animate();
     }
 
+    /**
+     * Animates cloud movement and recycling.
+     * @returns {void} - No return value.
+     */
     animate() {
         setInterval(() => {
             if (this.world && this.world.isStopped) return;
@@ -20,6 +29,10 @@ class Cloud extends MovableObject {
         }, 1000 / 60);
     }
 
+    /**
+     * Resets position if out of view.
+     * @returns {void} - No return value.
+     */
     resetPositionIfOutOfView() {
         if (!this.world || !this.world.canves) return;
         const cameraLeft = -this.world.camera_x;
