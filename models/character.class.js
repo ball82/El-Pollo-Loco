@@ -2,8 +2,8 @@ class Character extends MovableObject{
 
     height = 280;
     y = 80;
-    speed = 17;
-    hitDamage = 20;
+    speed = 8;
+    hitDamage = 10;
     jumpAnimationInterval = 90;
     lastJumpAnimationUpdate = 0;
     width = 150;
@@ -207,9 +207,7 @@ class Character extends MovableObject{
         if (this.isDead()) return;
         if (!this.isAboveGround()) {
             this.speedY = 12;
-            if (typeof playSfx === "function") {
-                playSfx("pepe-jump", 0.35);
-            }
+            AudioManager.playSfx("pepe-jump", 0.35);
         }
     } 
 

@@ -1,94 +1,87 @@
-class WorldCore {
-    character = new Character();
-    level = level1;
-    enemies = level1.enemies;
-    clouds = level1.clouds;
-    backgroundObjects = level1.backgroundObjects;
-    coins = level1.coins;
-    bottles = level1.bottles;
-    canves;
-    ctx;
-    keyboard;
-    camera_x = 0;
-    statusBar;
-    coinStatusBar;
-    bottleStatusBar;
-    throwableObjects = [];
-    isStopped = false;
-    isGameOver = false;
-    mainInterval;
-    animationFrameId;
-    lastThrow = 0;
-    endbossSpawnInterval = 8000;
-    lastEndbossSpawn = 0;
-
-    healthImages = [
-        'img_pollo_locco/img/7_statusbars/1_statusbar/2_statusbar_health/green/0.png',
-        'img_pollo_locco/img/7_statusbars/1_statusbar/2_statusbar_health/green/20.png',
-        'img_pollo_locco/img/7_statusbars/1_statusbar/2_statusbar_health/green/40.png',
-        'img_pollo_locco/img/7_statusbars/1_statusbar/2_statusbar_health/green/60.png',
-        'img_pollo_locco/img/7_statusbars/1_statusbar/2_statusbar_health/green/80.png',
-        'img_pollo_locco/img/7_statusbars/1_statusbar/2_statusbar_health/green/100.png'
-    ];
-
-    coinImages = [
-        'img_pollo_locco/img/7_statusbars/1_statusbar/1_statusbar_coin/orange/0.png',
-        'img_pollo_locco/img/7_statusbars/1_statusbar/1_statusbar_coin/orange/20.png',
-        'img_pollo_locco/img/7_statusbars/1_statusbar/1_statusbar_coin/orange/40.png',
-        'img_pollo_locco/img/7_statusbars/1_statusbar/1_statusbar_coin/orange/60.png',
-        'img_pollo_locco/img/7_statusbars/1_statusbar/1_statusbar_coin/orange/80.png',
-        'img_pollo_locco/img/7_statusbars/1_statusbar/1_statusbar_coin/orange/100.png'
-    ];
-
-    bottleImages = [
-        'img_pollo_locco/img/7_statusbars/1_statusbar/3_statusbar_bottle/orange/0.png',
-        'img_pollo_locco/img/7_statusbars/1_statusbar/3_statusbar_bottle/orange/20.png',
-        'img_pollo_locco/img/7_statusbars/1_statusbar/3_statusbar_bottle/orange/40.png',
-        'img_pollo_locco/img/7_statusbars/1_statusbar/3_statusbar_bottle/orange/60.png',
-        'img_pollo_locco/img/7_statusbars/1_statusbar/3_statusbar_bottle/orange/80.png',
-        'img_pollo_locco/img/7_statusbars/1_statusbar/3_statusbar_bottle/orange/100.png'
-    ];
-
-    constructor(canvas, keyboard) {
-        this.ctx = canvas.getContext('2d');
-        this.canves = canvas;
-        this.keyboard = keyboard;
-        this.showHitboxes = false;
-        this.statusBar = new StatusBar(this.healthImages, 40, 0);
-        this.coinStatusBar = new StatusBar(this.coinImages, 40, 60);
-        this.bottleStatusBar = new StatusBar(this.bottleImages, 40, 120);
-        this.statusBar.setPercentage(this.character.energy);
-        this.coinStatusBar.setPercentage(this.character.coins);
-        this.bottleStatusBar.setPercentage(this.character.bottles);
-        this.draw();
-        this.setWorld();
-        this.run();
+class World extends WorldCollectables {
+    
+    checkGameEnd() {
+        if (this.isGameOver) return;
+        if (this.handleLossCondition()) return;
+        this.handleWinCondition();
     }
 
-    setWorld() {
-        this.character.world = this;
-        this.enemies.forEach((enemy) => enemy.world = this);
-        this.clouds.forEach((cloud) => cloud.world = this);
-        this.coins.forEach((coin) => coin.world = this);
-        this.bottles.forEach((bottle) => bottle.world = this);
+    handleLossCondition() {
+        if (!this.character.isDead()) return false;
+        this.endGame(false);
+        return true;
     }
 
-    run() {
-        if (this.mainInterval) {
-            clearInterval(this.mainInterval);
-        }
-        this.mainInterval = setInterval(() => {
-            if (this.isStopped) return;
-            this.checkCollisions();
-            this.checkThrowObjects();
-            this.checkCollectables();
-            this.checkThrowableHits();
-            this.checkEndbossSpawn();
-            this.checkGameEnd();
-        }, 1000 / 60);
+    handleWinCondition() {
+        if (!this.isEndbossDefeated()) return;
+        const endboss = this.getEndboss();
+        if (this.isEndbossDeathAnimationRunning(endboss)) return;
+        this.removeEndboss(endboss);
+        this.endGame(true);
     }
 
-    draw() {
-        drawWorldFrame(this);
+    getEndboss() {
+        return this.enemies.find((enemy) => enemy instanceof Endboss);
+    }
+
+    isEndbossDeathAnimationRunning(endboss) {
+        const deadStartedAt = endboss?.deadStartedAt || 0;
+        const deadDuration = endboss?.getDeadAnimationDuration?.() || 0;
+        return deadStartedAt && Date.now() - deadStartedAt < deadDuration;
+    }
+
+    removeEndboss(endboss) {
+        if (!endboss) return;
+        const index = this.enemies.indexOf(endboss);
+        if (index !== -1) this.enemies.splice(index, 1);
+    }
+
+    isEndbossDefeated() {
+        const endboss = this.enemies.find((enemy) => enemy instanceof Endboss);
+        return !endboss || endboss.isDead;
+    }
+
+    endGame(isWin) {
+        this.isGameOver = true;
+        this.stop();
+        this.stopGameAudio();
+        this.playEndSound(isWin);
+        if (typeof showEndScreen === 'function') showEndScreen(isWin);
+    }
+
+    stopGameAudio() {
+        AudioManager.stopAllSounds();
+    }
+
+    playEndSound(isWin) {
+        AudioManager.playSfx(isWin ? 'win' : 'game-over', 0.45);
+    }
+
+    stop() {
+        this.isStopped = true;
+        this.stopMainInterval();
+        this.stopAnimationFrame();
+        this.stopThrowableObjects();
+    }
+
+    stopMainInterval() {
+        if (!this.mainInterval) return;
+        clearInterval(this.mainInterval);
+        this.mainInterval = null;
+    }
+
+    stopAnimationFrame() {
+        if (!this.animationFrameId) return;
+        cancelAnimationFrame(this.animationFrameId);
+        this.animationFrameId = null;
+    }
+
+    stopThrowableObjects() {
+        this.throwableObjects.forEach((bottle) => {
+            if (typeof bottle.stop === 'function') bottle.stop();
+        });
+        this.bottles.forEach((bottle) => {
+            if (typeof bottle.stop === 'function') bottle.stop();
+        });
     }
 }

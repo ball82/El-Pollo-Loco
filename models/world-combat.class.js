@@ -7,9 +7,7 @@ class WorldCombat extends WorldCore {
         bottle.world = this;
         this.throwableObjects.push(bottle);
         this.consumeBottle();
-        if (typeof playSfx === 'function') {
-            playSfx('bottle-throw', 0.35);
-        }
+        AudioManager.playSfx('bottle-throw', 0.35);
     }
 
     canThrowBottle() {
@@ -108,8 +106,8 @@ class WorldCombat extends WorldCore {
         if (wasHurt) return;
         this.character.hit();
         this.statusBar.setPercentage(this.character.energy);
-        if (!wasHurt && typeof playSfx === 'function') {
-            playSfx('pepe-hurt', 0.4);
+        if (!wasHurt) {
+            AudioManager.playSfx('pepe-hurt', 0.4);
         }
     }
 
@@ -194,7 +192,7 @@ class WorldCombat extends WorldCore {
     handleEndbossHit(enemy, bottle) {
         enemy.hit();
         if (bottle) this.splashBottleOnBoss(enemy, bottle);
-        if (typeof playSfx === 'function') playSfx('bottle-hit', 0.45);
+        AudioManager.playSfx('bottle-hit', 0.45);
     }
 
     splashBottleOnBoss(enemy, bottle) {

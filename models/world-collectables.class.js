@@ -13,7 +13,7 @@ class WorldCollectables extends WorldCombat {
         this.character.coins = Math.min(100, this.character.coins + 20);
         this.coinStatusBar.setPercentage(this.character.coins);
         this.coins.splice(index, 1);
-        if (typeof playSfx === 'function') playSfx('coin_insert', 0.15);
+        AudioManager.playSfx('coin_insert', 0.15);
     }
 
     collectBottles() {
@@ -28,7 +28,7 @@ class WorldCollectables extends WorldCombat {
             collectedBottle.stop();
         }
         this.bottles.splice(index, 1);
-        if (typeof playSfx === 'function') playSfx('retract_bottles', 0.15);
+        AudioManager.playSfx('retract_bottles', 0.15);
     }
 
     collectFromArray(items, onCollect) {
