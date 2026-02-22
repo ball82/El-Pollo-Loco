@@ -217,7 +217,7 @@ class Character extends MovableObject{
 
     isSleeping(){
         let timepassed = new Date().getTime() - this.lastAction;
-        return timepassed > 15000;
+        return timepassed > 10000;
     }
 
     hit() {
