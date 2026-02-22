@@ -4,6 +4,8 @@ class Character extends MovableObject{
     y = 80;
     speed = 17;
     hitDamage = 20;
+    jumpAnimationInterval = 90;
+    lastJumpAnimationUpdate = 0;
     width = 150;
     coins = 0;
     bottles = 0;
@@ -182,6 +184,9 @@ class Character extends MovableObject{
 
     playJumpAnimation(){
         if (!this.isAboveGround()) return false;
+        const now = Date.now();
+        if (now - this.lastJumpAnimationUpdate < this.jumpAnimationInterval) return true;
+        this.lastJumpAnimationUpdate = now;
         this.playAnimation(this.images_Jupping);
         return true;
     }
