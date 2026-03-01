@@ -265,16 +265,18 @@ class WorldCombat extends WorldCore {
     }
 
     /**
-     * Spawns a random chicken type close to the endboss.
+     * Spawns a random chicken type and launches it as an endboss attack.
      *
      * @param {Endboss} endboss - Endboss instance.
      * @returns {void} - No return value.
      */
     spawnChickenFromEndboss(endboss) {
         const chicken = Math.random() < 0.5 ? new SmallChicken() : new Chicken();
-        chicken.x = endboss.x + 30 + Math.random() * 110;
-        chicken.y = this.getGroundChickenY(chicken);
         chicken.world = this;
+        const groundY = this.getGroundChickenY(chicken);
+        const launchX = endboss.x + endboss.width * 0.35;
+        const launchY = endboss.y + endboss.height * 0.4;
+        chicken.launchFromEndboss(launchX, launchY, groundY);
         this.enemies.push(chicken);
     }
 

@@ -19,7 +19,7 @@ class WorldCore {
     mainInterval;
     animationFrameId;
     lastThrow = 0;
-    endbossSpawnInterval = 8000;
+    endbossSpawnInterval = 3000;
     lastEndbossSpawn = 0;
 
     healthImages = [

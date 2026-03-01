@@ -1,6 +1,10 @@
 class BaseChicken extends MovableObject {
     isDead = false;
     deadAt = 0;
+    isAirborneAttack = false;
+    airborneGravity = 0.42;
+    airborneSpeedY = 0;
+    airborneInterval = null;
     images_Walking = [];
     deadImage = '';
     startXMin = 900;
@@ -61,11 +65,60 @@ class BaseChicken extends MovableObject {
     }
 
     /**
+     * Launches chicken from the endboss and starts normal walking after landing.
+     *
+     * @param {number} startX - Start x-position in pixels.
+     * @param {number} startY - Start y-position in pixels.
+     * @param {number} groundY - Ground y-position where the chicken should land.
+     * @returns {void} - No return value.
+     */
+    launchFromEndboss(startX, startY, groundY) {
+        this.stopAirborneAttack();
+        this.x = startX;
+        this.y = startY;
+        this.isAirborneAttack = true;
+        this.airborneSpeedY = 10 + Math.random() * 2.5;
+        const horizontalSpeed = -(3.4 + Math.random() * 1.2);
+        this.airborneInterval = setInterval(() => {
+            this.updateAirborneAttack(horizontalSpeed, groundY);
+        }, this.moveInterval);
+    }
+
+    /**
+     * Updates airborne movement until ground contact.
+     *
+     * @param {number} horizontalSpeed - Horizontal speed for throw movement.
+     * @param {number} groundY - Ground y-position where the chicken should land.
+     * @returns {void} - No return value.
+     */
+    updateAirborneAttack(horizontalSpeed, groundY) {
+        if (this.world && this.world.isStopped) return;
+        if (this.isDead) return;
+        this.x += horizontalSpeed;
+        this.y -= this.airborneSpeedY;
+        this.airborneSpeedY -= this.airborneGravity;
+        if (this.y < groundY) return;
+        this.y = groundY;
+        this.isAirborneAttack = false;
+        this.stopAirborneAttack();
+    }
+
+    /**
+     * Stops airborne attack interval.
+     * @returns {void} - No return value.
+     */
+    stopAirborneAttack() {
+        if (!this.airborneInterval) return;
+        clearInterval(this.airborneInterval);
+        this.airborneInterval = null;
+    }
+
+    /**
      * Determines whether pause should run.
      * @returns {boolean} - True if the condition is met; otherwise false.
      */
     shouldPause() {
-        return (this.world && this.world.isStopped) || this.isDead;
+        return (this.world && this.world.isStopped) || this.isDead || this.isAirborneAttack;
     }
 
     /**
@@ -75,6 +128,8 @@ class BaseChicken extends MovableObject {
     die() {
         if (this.isDead) return;
         this.isDead = true;
+        this.isAirborneAttack = false;
+        this.stopAirborneAttack();
         this.deadAt = Date.now();
         if (this.deadImage) {
             this.loadImage(this.deadImage);
