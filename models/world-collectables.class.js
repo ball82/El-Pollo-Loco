@@ -64,9 +64,36 @@ class WorldCollectables extends WorldCombat {
      */
     collectFromArray(items, onCollect) {
         for (let i = items.length - 1; i >= 0; i--) {
-            if (this.character.isColliding(items[i])) {
-                onCollect(i);
-            }
+            const item = items[i];
+            if (!this.isCollectableCollision(item)) continue;
+            onCollect(i);
         }
+    }
+
+    /**
+     * Checks reduced collision between Pepe and one collectable item.
+     *
+     * @param {MovableObject} item - Collectable item to process.
+     * @returns {boolean} - True if reduced hitboxes overlap; otherwise false.
+     */
+    isCollectableCollision(item) {
+        return this.isAdjustedColliding(
+            this.character,
+            { top: 8, right: 10, bottom: 8, left: 10 },
+            item,
+            this.getCollectableOffset(item)
+        );
+    }
+
+    /**
+     * Returns reduced hitbox offset for collectable item types.
+     *
+     * @param {MovableObject} item - Collectable item to process.
+     * @returns {{top:number,right:number,bottom:number,left:number}} - Offset values.
+     */
+    getCollectableOffset(item) {
+        if (item instanceof Coin) return { top: 16, right: 16, bottom: 16, left: 16 };
+        if (item instanceof Bottle) return { top: 12, right: 14, bottom: 10, left: 14 };
+        return { top: 0, right: 0, bottom: 0, left: 0 };
     }
 }

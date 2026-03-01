@@ -114,17 +114,48 @@ class WorldCombat extends WorldCore {
      * @returns {boolean} - True if the condition is met; otherwise false.
      */
     isCharacterEnemyColliding(enemy) {
-        const characterBox = this.getAdjustedBox(this.character, {
-            top: 10,
-            right: 18,
-            bottom: 10,
-            left: 18
-        });
-        const enemyOffset = enemy instanceof Endboss
-            ? { top: 30, right: 35, bottom: 25, left: 35 }
-            : { top: 6, right: 8, bottom: 4, left: 8 };
-        const enemyBox = this.getAdjustedBox(enemy, enemyOffset);
-        return this.boxesOverlap(characterBox, enemyBox);
+        return this.isAdjustedColliding(
+            this.character,
+            this.getCharacterEnemyOffset(),
+            enemy,
+            this.getEnemyCharacterOffset(enemy)
+        );
+    }
+
+    /**
+     * Returns reduced hitbox offset for Pepe vs enemy collisions.
+     *
+     * @returns {{top:number,right:number,bottom:number,left:number}} - Offset values.
+     */
+    getCharacterEnemyOffset() {
+        return { top: 6, right: 12, bottom: 6, left: 12 };
+    }
+
+    /**
+     * Returns reduced hitbox offset for enemy vs Pepe collisions.
+     *
+     * @param {MovableObject} enemy - Enemy instance to process.
+     * @returns {{top:number,right:number,bottom:number,left:number}} - Offset values.
+     */
+    getEnemyCharacterOffset(enemy) {
+        return enemy instanceof Endboss
+            ? { top: 20, right: 25, bottom: 18, left: 25 }
+            : { top: 3, right: 5, bottom: 2, left: 5 };
+    }
+
+    /**
+     * Checks overlap using two reduced hitboxes.
+     *
+     * @param {MovableObject} firstObject - First object to process.
+     * @param {{top:number,right:number,bottom:number,left:number}} firstOffset - First offset.
+     * @param {MovableObject} secondObject - Second object to process.
+     * @param {{top:number,right:number,bottom:number,left:number}} secondOffset - Second offset.
+     * @returns {boolean} - True if reduced hitboxes overlap; otherwise false.
+     */
+    isAdjustedColliding(firstObject, firstOffset, secondObject, secondOffset) {
+        const firstBox = this.getAdjustedBox(firstObject, firstOffset);
+        const secondBox = this.getAdjustedBox(secondObject, secondOffset);
+        return this.boxesOverlap(firstBox, secondBox);
     }
 
     /**
@@ -254,7 +285,7 @@ class WorldCombat extends WorldCore {
      * @returns {number} - Ground y-position for the given chicken type.
      */
     getGroundChickenY(chicken) {
-        if (chicken instanceof SmallChicken) return 400;
+        if (chicken instanceof SmallChicken) return 370;
         return 370;
     }
 
@@ -295,11 +326,26 @@ class WorldCombat extends WorldCore {
     checkBottleEnemyCollisions(bottleIndex, bottle) {
         for (let enemyIndex = this.enemies.length - 1; enemyIndex >= 0; enemyIndex--) {
             const enemy = this.enemies[enemyIndex];
-            if (!bottle.isColliding(enemy)) continue;
+            if (!this.isThrowableBottleEnemyColliding(bottle, enemy)) continue;
             this.handleThrowableHit(enemy, enemyIndex, bottle);
             if (!(enemy instanceof Endboss)) this.removeThrowableObject(bottleIndex);
             break;
         }
+    }
+
+    /**
+     * Checks collision between a thrown bottle and an enemy with reduced hitboxes.
+     *
+     * @param {ThowableObject} bottle - Thrown bottle instance.
+     * @param {MovableObject} enemy - Enemy instance to process.
+     * @returns {boolean} - True if reduced hitboxes overlap; otherwise false.
+     */
+    isThrowableBottleEnemyColliding(bottle, enemy) {
+        const bottleOffset = { top: 4, right: 5, bottom: 4, left: 5 };
+        const enemyOffset = enemy instanceof Endboss
+            ? { top: 20, right: 25, bottom: 18, left: 25 }
+            : { top: 3, right: 5, bottom: 2, left: 5 };
+        return this.isAdjustedColliding(bottle, bottleOffset, enemy, enemyOffset);
     }
 
     /**

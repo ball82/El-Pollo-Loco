@@ -1,5 +1,5 @@
 class SmallChicken extends BaseChicken {
-    y = 400;
+    y = 370;
     height = 45;
     width = 45;
     images_Walking = [
