@@ -4,8 +4,10 @@ class Character extends MovableObject{
     y = 80;
     speed = 8;
     hitDamage = 10;
-    jumpAnimationInterval = 90;
+    jumpAnimationInterval = 180;
     lastJumpAnimationUpdate = 0;
+    idleAnimationInterval = 180;
+    lastIdleAnimationUpdate = 0;
     width = 150;
     coins = 0;
     bottles = 0;
@@ -215,7 +217,7 @@ class Character extends MovableObject{
      * @returns {void} - No return value.
      */
     startAnimationLoop(){
-        setInterval(() => this.updateAnimationState(), 35);
+        setInterval(() => this.updateAnimationState(), 70);
     }
 
     /**
@@ -273,6 +275,9 @@ class Character extends MovableObject{
             this.playAnimation(this.images_Walking);
             return;
         }
+        const now = Date.now();
+        if (now - this.lastIdleAnimationUpdate < this.idleAnimationInterval) return;
+        this.lastIdleAnimationUpdate = now;
         this.playAnimation(this.isSleeping() ? this.images_Sleep : this.images_Idle);
     }
 

@@ -336,3 +336,8 @@ canvas {
 .modal-content {
   font-size: 1.1rem;
 }
+
+.modal-content address {
+  font-style: normal;
+  margin: 8px 0;
+}

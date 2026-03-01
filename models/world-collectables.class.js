@@ -45,9 +45,10 @@ class WorldCollectables extends WorldCombat {
      * @returns {void} - No return value.
      */
     onBottleCollected(index) {
+        if (this.character.bottles >= this.bottleCapacity) return;
         const collectedBottle = this.bottles[index];
-        this.character.bottles = Math.min(100, this.character.bottles + 20);
-        this.bottleStatusBar.setPercentage(this.character.bottles);
+        this.character.bottles = Math.min(this.bottleCapacity, this.character.bottles + 1);
+        this.updateBottleStatusBar();
         if (collectedBottle && typeof collectedBottle.stop === 'function') {
             collectedBottle.stop();
         }

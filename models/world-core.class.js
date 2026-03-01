@@ -13,14 +13,18 @@ class WorldCore {
     statusBar;
     coinStatusBar;
     bottleStatusBar;
+    endbossStatusBar;
+    endbossStatusBarVisible = false;
     throwableObjects = [];
     isStopped = false;
     isGameOver = false;
     mainInterval;
     animationFrameId;
     lastThrow = 0;
+    bottleCapacity = 8;
     endbossSpawnInterval = 3000;
     lastEndbossSpawn = 0;
+    endbossBottleRefillTriggered = false;
 
     healthImages = [
         'img_pollo_locco/img/7_statusbars/1_statusbar/2_statusbar_health/green/0.png',
@@ -49,6 +53,15 @@ class WorldCore {
         'img_pollo_locco/img/7_statusbars/1_statusbar/3_statusbar_bottle/orange/100.png'
     ];
 
+    endbossStatusImages = [
+        'img_pollo_locco/img/7_statusbars/2_statusbar_endboss/green/green0.png',
+        'img_pollo_locco/img/7_statusbars/2_statusbar_endboss/green/green20.png',
+        'img_pollo_locco/img/7_statusbars/2_statusbar_endboss/green/green40.png',
+        'img_pollo_locco/img/7_statusbars/2_statusbar_endboss/green/green60.png',
+        'img_pollo_locco/img/7_statusbars/2_statusbar_endboss/green/green80.png',
+        'img_pollo_locco/img/7_statusbars/2_statusbar_endboss/green/green100.png'
+    ];
+
     /**
      * Creates an instance of WorldCore.
      *
@@ -63,9 +76,11 @@ class WorldCore {
         this.statusBar = new StatusBar(this.healthImages, 40, 0);
         this.coinStatusBar = new StatusBar(this.coinImages, 40, 60);
         this.bottleStatusBar = new StatusBar(this.bottleImages, 40, 120);
+        this.endbossStatusBar = new StatusBar(this.endbossStatusImages, 480, 0);
         this.statusBar.setPercentage(this.character.energy);
         this.coinStatusBar.setPercentage(this.character.coins);
-        this.bottleStatusBar.setPercentage(this.character.bottles);
+        this.updateBottleStatusBar();
+        this.endbossStatusBar.setPercentage(100);
         this.draw();
         this.setWorld();
         this.run();
@@ -98,9 +113,55 @@ class WorldCore {
             this.checkCollectables();
             this.checkThrowableHits();
             this.checkEndbossSpawn();
+            this.checkEndbossBottleRefill();
+            this.updateEndbossStatusBar();
             this.checkGameEnd();
         }, 1000 / 60);
     }
+
+    /**
+     * Updates endboss health bar value and visibility during boss fight.
+     * Overridden methods are used when available.
+     *
+     * @returns {void} - No return value.
+     */
+    updateEndbossStatusBar() {
+        if (!this.endbossStatusBar) return;
+        if (typeof this.getEndboss !== 'function') return;
+        const endboss = this.getEndboss();
+        if (!endboss) {
+            this.endbossStatusBarVisible = false;
+            return;
+        }
+        const canvasWidth = this.canves?.width || 720;
+        this.endbossStatusBar.x = canvasWidth - this.endbossStatusBar.width - 28;
+        this.endbossStatusBar.y = 12;
+        this.endbossStatusBarVisible = this.character.x >= endboss.x - canvasWidth * 0.9;
+        const maxHits = Math.max(1, endboss.maxHits || 1);
+        const remainingHits = Math.max(0, maxHits - (endboss.hitsTaken || 0));
+        const percentage = (remainingHits / maxHits) * 100;
+        this.endbossStatusBar.setPercentage(percentage);
+    }
+
+    /**
+     * Updates bottle status bar based on current bottle count and max capacity.
+     *
+     * @returns {void} - No return value.
+     */
+    updateBottleStatusBar() {
+        if (!this.bottleStatusBar) return;
+        const safeCapacity = Math.max(1, this.bottleCapacity || 1);
+        const percentage = (Math.max(0, this.character.bottles) / safeCapacity) * 100;
+        this.bottleStatusBar.setPercentage(percentage);
+    }
+
+    /**
+     * Optional hook for one-time bottle refill near endboss zone.
+     * Overridden in WorldCombat.
+     *
+     * @returns {void} - No return value.
+     */
+    checkEndbossBottleRefill() {}
 
     /**
      * Draws the object.

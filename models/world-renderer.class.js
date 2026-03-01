@@ -51,6 +51,9 @@ class WorldRenderer {
         this.drawObject(world, world.statusBar);
         this.drawObject(world, world.coinStatusBar);
         this.drawObject(world, world.bottleStatusBar);
+        if (world.endbossStatusBarVisible && world.endbossStatusBar) {
+            this.drawObject(world, world.endbossStatusBar);
+        }
     }
 
     /**

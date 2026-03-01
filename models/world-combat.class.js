@@ -15,6 +15,9 @@ class WorldCombat extends WorldCore {
         const bottle = new ThowableObject(this.character.x + 100, this.character.y + 100);
         bottle.world = this;
         this.throwableObjects.push(bottle);
+        if (typeof this.character.registerAction === 'function') {
+            this.character.registerAction();
+        }
         this.consumeBottle();
         AudioManager.playSfx('bottle-throw', 0.35);
     }
@@ -26,7 +29,7 @@ class WorldCombat extends WorldCore {
      */
     canThrowBottle() {
         const timepassed = new Date().getTime() - this.lastThrow;
-        return this.character.bottles >= 20 &&
+        return this.character.bottles >= 1 &&
             timepassed > 400 &&
             !this.hasFlyingThrowableBottle();
     }
@@ -58,8 +61,8 @@ class WorldCombat extends WorldCore {
      */
     consumeBottle() {
         this.lastThrow = new Date().getTime();
-        this.character.bottles = Math.max(0, this.character.bottles - 20);
-        this.bottleStatusBar.setPercentage(this.character.bottles);
+        this.character.bottles = Math.max(0, this.character.bottles - 1);
+        this.updateBottleStatusBar();
     }
 
     /**
@@ -257,38 +260,25 @@ class WorldCombat extends WorldCore {
      */
     checkEndbossSpawn() {
         const endboss = this.getEndboss();
-        if (!endboss || endboss.isDead) return;
-        const now = Date.now();
-        if (now - this.lastEndbossSpawn < this.endbossSpawnInterval) return;
-        this.spawnChickenFromEndboss(endboss);
-        this.lastEndbossSpawn = now;
+        if (!endboss) return;
+        if (!endboss.shouldSpawnSupportChicken(this.lastEndbossSpawn, this.endbossSpawnInterval)) return;
+        this.enemies.push(endboss.createSupportChicken(this));
+        this.lastEndbossSpawn = Date.now();
     }
 
     /**
-     * Spawns a random chicken type and launches it as an endboss attack.
+     * Spawns extra collectible bottles once when Pepe reaches the endboss zone.
      *
-     * @param {Endboss} endboss - Endboss instance.
      * @returns {void} - No return value.
      */
-    spawnChickenFromEndboss(endboss) {
-        const chicken = Math.random() < 0.5 ? new SmallChicken() : new Chicken();
-        chicken.world = this;
-        const groundY = this.getGroundChickenY(chicken);
-        const launchX = endboss.x + endboss.width * 0.35;
-        const launchY = endboss.y + endboss.height * 0.4;
-        chicken.launchFromEndboss(launchX, launchY, groundY);
-        this.enemies.push(chicken);
-    }
-
-    /**
-     * Returns the ground Y position for a spawned chicken type.
-     *
-     * @param {BaseChicken} chicken - Chicken instance.
-     * @returns {number} - Ground y-position for the given chicken type.
-     */
-    getGroundChickenY(chicken) {
-        if (chicken instanceof SmallChicken) return 370;
-        return 370;
+    checkEndbossBottleRefill() {
+        if (this.endbossBottleRefillTriggered) return;
+        if (typeof this.getEndboss !== 'function') return;
+        const endboss = this.getEndboss();
+        if (!endboss || endboss.isDead) return;
+        if (!endboss.hasCharacterReachedFightZone(this.character)) return;
+        endboss.spawnRefillBottles(this);
+        this.endbossBottleRefillTriggered = true;
     }
 
     /**
@@ -404,22 +394,7 @@ class WorldCombat extends WorldCore {
      * @returns {void} - No return value.
      */
     handleEndbossHit(enemy, bottle) {
-        enemy.hit();
-        if (bottle) this.splashBottleOnBoss(enemy, bottle);
+        enemy.handleBottleHit(bottle);
         AudioManager.playSfx('bottle-hit', 0.45);
-    }
-
-    /**
-     * Repositions splash slightly based on impact side and starts splash animation.
-     *
-     * @param {Endboss} enemy - Enemy instance to process.
-     * @param {ThowableObject} bottle - Thrown bottle instance.
-     * @returns {void} - No return value.
-     */
-    splashBottleOnBoss(enemy, bottle) {
-        const bossCenter = enemy.x + enemy.width / 2;
-        const bottleCenter = bottle.x + bottle.width / 2;
-        bottle.x += bottleCenter < bossCenter ? 20 : -20;
-        bottle.splash();
     }
 }
