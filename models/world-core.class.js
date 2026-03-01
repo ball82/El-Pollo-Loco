@@ -139,8 +139,21 @@ class WorldCore {
         this.endbossStatusBarVisible = this.character.x >= endboss.x - canvasWidth * 0.9;
         const maxHits = Math.max(1, endboss.maxHits || 1);
         const remainingHits = Math.max(0, maxHits - (endboss.hitsTaken || 0));
-        const percentage = (remainingHits / maxHits) * 100;
+        const percentage = this.getEndbossStatusPercentage(maxHits, remainingHits);
         this.endbossStatusBar.setPercentage(percentage);
+    }
+
+    /**
+     * Returns a status percentage that keeps the bar visible until the last hit.
+     *
+     * @param {number} maxHits - Maximum hits required to defeat endboss.
+     * @param {number} remainingHits - Remaining hits before defeat.
+     * @returns {number} - Status bar percentage.
+     */
+    getEndbossStatusPercentage(maxHits, remainingHits) {
+        if (remainingHits <= 0) return 0;
+        if (maxHits <= 1) return 100;
+        return 20 + ((remainingHits - 1) / (maxHits - 1)) * 80;
     }
 
     /**

@@ -72,23 +72,17 @@ class WorldCombat extends WorldCore {
      */
     checkCollisions() {
         if (this.character.isDead()) return;
+        const collidedEnemies = [];
         for (let i = this.enemies.length - 1; i >= 0; i--) {
-            this.processEnemyCollision(this.enemies[i], i);
+            const enemy = this.enemies[i];
+            if (enemy.isDead) continue;
+            if (!this.isCharacterEnemyColliding(enemy)) continue;
+            collidedEnemies.push({ enemy, index: i });
         }
-    }
-
-    /**
-     * Handles a single enemy collision case.
-     *
-     * @param {MovableObject} enemy - Enemy instance to process.
-     * @param {number} index - Index in the related collection.
-     * @returns {void} - No return value.
-     */
-    processEnemyCollision(enemy, index) {
-        if (enemy.isDead) return;
-        if (!this.isCharacterEnemyColliding(enemy)) return;
-        if (this.isStompingEnemy(enemy)) {
-            this.handleStomp(enemy, index);
+        if (!collidedEnemies.length) return;
+        const stompTargets = collidedEnemies.filter(({ enemy }) => this.isStompingEnemy(enemy));
+        if (stompTargets.length) {
+            stompTargets.forEach(({ enemy, index }) => this.handleStomp(enemy, index));
             return;
         }
         this.handleCharacterHit();
