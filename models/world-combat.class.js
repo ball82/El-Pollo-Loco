@@ -205,6 +205,7 @@ class WorldCombat extends WorldCore {
             this.enemies.splice(index, 1);
         }
         this.character.speedY = 10;
+        this.character.resetJumpAnimation();
     }
 
     /**

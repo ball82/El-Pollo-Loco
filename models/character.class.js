@@ -287,6 +287,11 @@ class Character extends MovableObject{
         this.img = this.imageCache[this.path];
     }
 
+    resetJumpAnimation(){
+        this.jumpFrame = 0;
+        this.wasInAir = false;
+    }
+
     /**
      * Plays ground animation.
      * @returns {void} - No return value.
