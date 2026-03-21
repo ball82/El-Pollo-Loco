@@ -1,6 +1,7 @@
 class AudioManager {
     static musicListenerAttached = false;
     static isMuted = false;
+    static activeMusic = null;
     static MUTE_STORAGE_KEY = 'el_pollo_loco_muted';
 
     /**
@@ -18,7 +19,8 @@ class AudioManager {
      * @returns {void} - No return value.
      */
     static startBackgroundMusic() {
-        this.playConfiguredTrack('bg-music', 0.02, () => this.startBackgroundMusic());
+        this.activeMusic = 'bg-music';
+        this.playConfiguredTrack('bg-music', 0.015, () => this.startBackgroundMusic());
     }
 
     /**
@@ -26,7 +28,8 @@ class AudioManager {
      * @returns {void} - No return value.
      */
     static startGameMusic() {
-        this.playConfiguredTrack('game-music', 0.1, () => this.startGameMusic());
+        this.activeMusic = 'game-music';
+        this.playConfiguredTrack('game-music', 0.05, () => this.startGameMusic());
     }
 
     /**
@@ -76,7 +79,7 @@ class AudioManager {
      * @param {number} volume - Audio volume in range 0..1.
      * @returns {void} - No return value.
      */
-    static playSfx(id, volume = 0.3) {
+    static playSfx(id, volume = 0.15) {
         if (this.isMuted) return;
         const audio = this.getAudio(id);
         if (!audio) return;
@@ -135,12 +138,9 @@ class AudioManager {
     }
 
     static resumeActiveMusic() {
-        for (const id of ['game-music', 'bg-music']) {
-            const audio = this.getAudio(id);
-            if (!audio || audio.currentTime === 0) continue;
-            audio.play().catch(() => {});
-            return;
-        }
+        const id = this.activeMusic || 'bg-music';
+        const audio = this.getAudio(id);
+        if (audio) audio.play().catch(() => {});
     }
 
     /**
