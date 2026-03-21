@@ -125,7 +125,7 @@ class WorldCombat extends WorldCore {
      * @returns {{top:number,right:number,bottom:number,left:number}} - Offset values.
      */
     getCharacterEnemyOffset() {
-        return { top: 6, right: 12, bottom: 6, left: 12 };
+        return { top: 80, right: 28, bottom: 10, left: 28 };
     }
 
     /**
@@ -137,7 +137,7 @@ class WorldCombat extends WorldCore {
     getEnemyCharacterOffset(enemy) {
         return enemy instanceof Endboss
             ? { top: 20, right: 25, bottom: 18, left: 25 }
-            : { top: 3, right: 5, bottom: 2, left: 5 };
+            : { top: 6, right: 10, bottom: 4, left: 10 };
     }
 
     /**

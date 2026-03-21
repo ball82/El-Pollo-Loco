@@ -80,7 +80,7 @@ class WorldCollectables extends WorldCombat {
     isCollectableCollision(item) {
         return this.isAdjustedColliding(
             this.character,
-            { top: 8, right: 10, bottom: 8, left: 10 },
+            { top: 80, right: 28, bottom: 10, left: 28 },
             item,
             this.getCollectableOffset(item)
         );
@@ -93,8 +93,8 @@ class WorldCollectables extends WorldCombat {
      * @returns {{top:number,right:number,bottom:number,left:number}} - Offset values.
      */
     getCollectableOffset(item) {
-        if (item instanceof Coin) return { top: 16, right: 16, bottom: 16, left: 16 };
-        if (item instanceof Bottle) return { top: 12, right: 14, bottom: 10, left: 14 };
+        if (item instanceof Coin) return { top: 22, right: 22, bottom: 22, left: 22 };
+        if (item instanceof Bottle) return { top: 15, right: 15, bottom: 12, left: 15 };
         return { top: 0, right: 0, bottom: 0, left: 0 };
     }
 }
