@@ -12,7 +12,9 @@ class WorldCombat extends WorldCore {
     checkThrowObjects() {
         if (!this.keyboard.D) return;
         if (!this.canThrowBottle()) return;
-        const bottle = new ThowableObject(this.character.x + 100, this.character.y + 100);
+        const throwLeft = this.character.otherDirection;
+        const offsetX = throwLeft ? -30 : 100;
+        const bottle = new ThowableObject(this.character.x + offsetX, this.character.y + 100, throwLeft);
         bottle.world = this;
         this.throwableObjects.push(bottle);
         if (typeof this.character.registerAction === 'function') {

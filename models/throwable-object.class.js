@@ -6,8 +6,9 @@ class ThowableObject extends MovableObject {
      * @param {number} x - Horizontal position in pixels.
      * @param {number} y - Vertical position in pixels.
      */
-    constructor(x, y){
+    constructor(x, y, throwLeft = false){
         super().loadImage('img_pollo_locco/img/6_salsa_bottle/bottle_rotation/1_bottle_rotation.png');
+        this.throwLeft = throwLeft;
         this.images_Rotation = [
             'img_pollo_locco/img/6_salsa_bottle/bottle_rotation/1_bottle_rotation.png',
             'img_pollo_locco/img/6_salsa_bottle/bottle_rotation/2_bottle_rotation.png',
@@ -45,7 +46,7 @@ class ThowableObject extends MovableObject {
         this.throwInterval = setInterval(() => {
             if (this.world && this.world.isStopped) return;
             if (this.isMarkedForRemoval) return;
-            this.x += 6.5;
+            this.x += this.throwLeft ? -6.5 : 6.5;
         }, 16);
     }
 
