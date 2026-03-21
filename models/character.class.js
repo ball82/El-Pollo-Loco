@@ -3,7 +3,7 @@ class Character extends MovableObject{
     height = 280;
     y = 80;
     speed = 8;
-    hitDamage = 10;
+    hitDamage = 20;
     groundLevel = 160;
     jumpAnimationInterval = 180;
     lastJumpAnimationUpdate = 0;

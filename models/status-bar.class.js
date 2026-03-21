@@ -1,6 +1,8 @@
-class StatusBar extends DrawableObject {    
+class StatusBar extends DrawableObject {
     percentage = 100;
     images_StatusBar = [];
+    blinkVisible = true;
+    blinkInterval = null;
 
     /**
      * Creates an instance of StatusBar.
@@ -43,6 +45,19 @@ class StatusBar extends DrawableObject {
         if (this.percentage >= 40) return 2;
         if (this.percentage > 0) return 1;
         return 0;
+    }
+
+    startBlink() {
+        if (this.blinkInterval) return;
+        this.blinkInterval = setInterval(() => {
+            this.blinkVisible = !this.blinkVisible;
+        }, 350);
+    }
+
+    stopBlink() {
+        clearInterval(this.blinkInterval);
+        this.blinkInterval = null;
+        this.blinkVisible = true;
     }
 
 }

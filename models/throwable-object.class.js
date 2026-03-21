@@ -72,6 +72,7 @@ class ThowableObject extends MovableObject {
         this.hasHit = true;
         this.stopThrowMovement();
         this.speedY = 0;
+        AudioManager.playSfx('bottle-hit', 0.45);
         this.startSplashAnimation();
     }
 

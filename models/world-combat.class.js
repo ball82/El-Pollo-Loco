@@ -317,7 +317,7 @@ class WorldCombat extends WorldCore {
             const enemy = this.enemies[enemyIndex];
             if (!this.isThrowableBottleEnemyColliding(bottle, enemy)) continue;
             this.handleThrowableHit(enemy, enemyIndex, bottle);
-            if (!(enemy instanceof Endboss)) this.removeThrowableObject(bottleIndex);
+            if (!(enemy instanceof Endboss)) bottle.splash();
             break;
         }
     }
@@ -380,7 +380,7 @@ class WorldCombat extends WorldCore {
      */
     handleThrowableHit(enemy, enemyIndex, bottle) {
         if (enemy instanceof Endboss) return this.handleEndbossHit(enemy, bottle);
-        this.enemies.splice(enemyIndex, 1);
+        this.killChicken(enemy);
     }
 
     /**
@@ -392,6 +392,5 @@ class WorldCombat extends WorldCore {
      */
     handleEndbossHit(enemy, bottle) {
         enemy.handleBottleHit(bottle);
-        AudioManager.playSfx('bottle-hit', 0.45);
     }
 }

@@ -63,7 +63,6 @@ class AudioManager {
      * @returns {void} - No return value.
      */
     static playTrack(audio, retryFn) {
-        if (this.isMuted) return;
         const playPromise = audio.play();
         if (playPromise && typeof playPromise.catch === 'function') {
             playPromise.catch(() => this.runOnFirstInteraction(retryFn));
@@ -130,9 +129,18 @@ class AudioManager {
     static toggleMute() {
         this.isMuted = !this.isMuted;
         this.setAllAudioMuted(this.isMuted);
-        if (this.isMuted) this.stopAllSounds();
+        if (!this.isMuted) this.resumeActiveMusic();
         this.saveMutePreference();
         this.updateMuteButtons();
+    }
+
+    static resumeActiveMusic() {
+        for (const id of ['game-music', 'bg-music']) {
+            const audio = this.getAudio(id);
+            if (!audio || audio.currentTime === 0) continue;
+            audio.play().catch(() => {});
+            return;
+        }
     }
 
     /**
@@ -154,7 +162,10 @@ class AudioManager {
     static setupMuteButtons() {
         const buttons = document.querySelectorAll('.mute-toggle');
         if (!buttons.length) return;
-        buttons.forEach((button) => button.addEventListener('click', () => this.toggleMute()));
+        buttons.forEach((button) => button.addEventListener('click', (e) => {
+            this.toggleMute();
+            e.currentTarget.blur();
+        }));
         this.updateMuteButtons();
     }
 

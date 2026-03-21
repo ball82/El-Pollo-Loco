@@ -131,8 +131,19 @@ class BaseChicken extends MovableObject {
         this.isAirborneAttack = false;
         this.stopAirborneAttack();
         this.deadAt = Date.now();
-        if (this.deadImage) {
-            this.loadImage(this.deadImage);
-        }
+        if (this.deadImage) this.loadImage(this.deadImage);
+        if (this.groundY && this.y < this.groundY) this.fallToGround();
+    }
+
+    fallToGround() {
+        let speedY = 0;
+        this.airborneInterval = setInterval(() => {
+            speedY -= this.airborneGravity;
+            this.y -= speedY;
+            if (this.y >= this.groundY) {
+                this.y = this.groundY;
+                this.stopAirborneAttack();
+            }
+        }, this.moveInterval);
     }
 }

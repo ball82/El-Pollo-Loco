@@ -115,6 +115,7 @@ class WorldCore {
             this.checkEndbossSpawn();
             this.checkEndbossBottleRefill();
             this.updateEndbossStatusBar();
+            this.updateHealthBarBlink();
             this.checkGameEnd();
         }, 1000 / 60);
     }
@@ -135,12 +136,14 @@ class WorldCore {
         }
         const canvasWidth = this.canves?.width || 720;
         this.endbossStatusBar.x = canvasWidth - this.endbossStatusBar.width - 28;
-        this.endbossStatusBar.y = 12;
+        this.endbossStatusBar.y = 55;
         this.endbossStatusBarVisible = this.character.x >= endboss.x - canvasWidth * 0.9;
         const maxHits = Math.max(1, endboss.maxHits || 1);
         const remainingHits = Math.max(0, maxHits - (endboss.hitsTaken || 0));
         const percentage = this.getEndbossStatusPercentage(maxHits, remainingHits);
         this.endbossStatusBar.setPercentage(percentage);
+        if (remainingHits === 1) this.endbossStatusBar.startBlink();
+        else this.endbossStatusBar.stopBlink();
     }
 
     /**
@@ -152,8 +155,7 @@ class WorldCore {
      */
     getEndbossStatusPercentage(maxHits, remainingHits) {
         if (remainingHits <= 0) return 0;
-        if (maxHits <= 1) return 100;
-        return 20 + ((remainingHits - 1) / (maxHits - 1)) * 80;
+        return Math.round((remainingHits / maxHits) * 100);
     }
 
     /**
@@ -174,6 +176,13 @@ class WorldCore {
      *
      * @returns {void} - No return value.
      */
+    updateHealthBarBlink() {
+        const energy = this.character.energy;
+        const critical = this.character.hitDamage || 10;
+        if (energy > 0 && energy <= critical) this.statusBar.startBlink();
+        else this.statusBar.stopBlink();
+    }
+
     checkEndbossBottleRefill() {}
 
     /**

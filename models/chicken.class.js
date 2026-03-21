@@ -1,5 +1,6 @@
 class Chicken extends BaseChicken{
     y= 370;
+    groundY = 370;
     height= 60;
     width= 60;
     images_Walking = [
