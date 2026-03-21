@@ -63,6 +63,7 @@ class AudioManager {
      * @returns {void} - No return value.
      */
     static playTrack(audio, retryFn) {
+        if (this.isMuted) return;
         const playPromise = audio.play();
         if (playPromise && typeof playPromise.catch === 'function') {
             playPromise.catch(() => this.runOnFirstInteraction(retryFn));
@@ -80,6 +81,7 @@ class AudioManager {
         if (this.isMuted) return;
         const audio = this.getAudio(id);
         if (!audio) return;
+        audio.muted = false;
         audio.volume = volume;
         audio.currentTime = 0;
         this.playTrack(audio, () => this.playSfx(id, volume));
