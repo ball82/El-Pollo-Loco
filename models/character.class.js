@@ -4,8 +4,11 @@ class Character extends MovableObject{
     y = 80;
     speed = 8;
     hitDamage = 10;
+    groundLevel = 160;
     jumpAnimationInterval = 180;
     lastJumpAnimationUpdate = 0;
+    jumpFrame = 0;
+    wasInAir = false;
     idleAnimationInterval = 180;
     lastIdleAnimationUpdate = 0;
     width = 150;
@@ -258,12 +261,30 @@ class Character extends MovableObject{
      * @returns {boolean} - True if the condition is met; otherwise false.
      */
     playJumpAnimation(){
-        if (!this.isAboveGround()) return false;
-        const now = Date.now();
-        if (now - this.lastJumpAnimationUpdate < this.jumpAnimationInterval) return true;
-        this.lastJumpAnimationUpdate = now;
-        this.playAnimation(this.images_Jupping);
+        if (!this.isAboveGround()) {
+            this.wasInAir = false;
+            return false;
+        }
+        if (!this.wasInAir) {
+            this.jumpFrame = 0;
+            this.wasInAir = true;
+        }
+        this.tickJumpFrame();
         return true;
+    }
+
+    tickJumpFrame(){
+        const now = Date.now();
+        if (now - this.lastJumpAnimationUpdate < this.jumpAnimationInterval) return;
+        this.lastJumpAnimationUpdate = now;
+        this.showJumpFrame();
+        if (this.jumpFrame < this.images_Jupping.length - 1) this.jumpFrame++;
+    }
+
+    showJumpFrame(){
+        const frame = Math.min(this.jumpFrame, this.images_Jupping.length - 1);
+        this.path = this.images_Jupping[frame];
+        this.img = this.imageCache[this.path];
     }
 
     /**

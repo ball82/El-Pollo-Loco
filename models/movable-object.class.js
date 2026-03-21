@@ -5,6 +5,7 @@ class MovableObject extends DrawableObject {
   acceleration = 0.42;
   energy = 100;
   lastHit = 0;
+  groundLevel = 150;
   
 
   /**
@@ -16,8 +17,12 @@ class MovableObject extends DrawableObject {
     this.gravityInterval = setInterval(() => {
       if (this.world && this.world.isStopped) return;
       if (this.isAboveGround() || this.speedY > 0) {
-        this.y -= this.speedY;  
+        this.y -= this.speedY;
         this.speedY -= this.acceleration;
+        if (!this.isAboveGround() && this.speedY <= 0) {
+          this.y = this.groundLevel;
+          this.speedY = 0;
+        }
       }
     }, 1000 / 60);
   }
@@ -37,11 +42,8 @@ class MovableObject extends DrawableObject {
    * @returns {boolean} - True if the condition is met; otherwise false.
    */
   isAboveGround() {
-    if (this instanceof ThowableObject) {
-      return true;
-    } else {
-      return this.y < 150;
-    }
+    if (this instanceof ThowableObject) return true;
+    return this.y < this.groundLevel;
   }
 
 

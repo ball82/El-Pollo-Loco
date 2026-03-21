@@ -53,7 +53,7 @@ class BaseEndboss extends MovableObject {
      * @returns {number} - Ground y-position.
      */
     getGroundChickenY(chicken) {
-        if (chicken instanceof SmallChicken) return 370;
+        if (chicken instanceof SmallChicken) return 385;
         return 370;
     }
 
