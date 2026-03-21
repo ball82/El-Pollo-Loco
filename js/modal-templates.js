@@ -39,7 +39,7 @@ class ModalTemplates {
     static getImpressumData() {
         return {
             title: 'Impressum',
-            html: '<p>Hinweis: Diese Seite ist ein Portfolio-Projekt mit Musterangaben.</p><p>Angaben gemaess § 5 TMG (Muster):</p><address>Max Musterdev<br>Musterstrasse 42<br>12345 Musterstadt<br>Deutschland</address><p>E-Mail: <a href="mailto:kontakt@max-musterdev-portfolio.de">kontakt@max-musterdev-portfolio.de</a></p><p>Verantwortlich fuer den Inhalt nach § 18 Abs. 2 MStV: Max Musterdev, Anschrift wie oben.</p>'
+            html: '<p>Hinweis: Diese Seite ist ein Portfolio-Projekt</p><p>Angaben gemaess § 5 TMG</p><address>Joannis Ballos<br>Oltnerstrasse 48<br>5012 Schönenwerd<br>Schweiz</address><p>E-Mail: <a href="mailto:Portfolio@bajo-dev.ch">Portfolio@bajo-dev.ch</a></p>'
         };
     }
 
