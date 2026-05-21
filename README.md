@@ -1,5 +1,7 @@
 # El Pollo Loco
 
+**[Live Demo spielen](https://elpolloloco.bajo-dev.ch/)**
+
 Ein browser-basiertes 2D Jump-and-Run-Spiel, entwickelt mit Vanilla JavaScript und dem HTML5 Canvas.
 
 ## Spielprinzip
